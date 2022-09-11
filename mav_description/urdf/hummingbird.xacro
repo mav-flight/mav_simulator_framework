@@ -16,4 +16,8 @@
   limitations under the License.
 -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <!--
+    Include the hummingbird base xacro
+  -->
+  <xacro:include filename="$(find mav_description)/urdf/hummingbird_base.xacro"/>
 </robot>
