@@ -5,7 +5,7 @@
   <version>0.0.0</version>
   <description>MAV gazebo simulator</description>
   <maintainer email="4303534+suresh-guttikonda@users.noreply.github.com">thor</maintainer>
-  <license>MIT</license>
+  <license>Apache License 2.0</license>
 
   <buildtool_depend condition="$ROS_VERSION == 2">ament_cmake</buildtool_depend>
 
