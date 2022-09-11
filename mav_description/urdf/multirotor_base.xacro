@@ -23,7 +23,7 @@
   <xacro:macro name="box_inertia" params="x y z mass">
     <inertia ixx="${(1.0/12.0) * mass * (y*y + z*z)}" ixy="0.0" ixz="0.0"
              iyy="${(1.0/12.0) * mass * (x*x + z*z)}" iyz="0.0"
-             izz="${(1.0/12.0) * mass * (x*x + y*y)}"/>
+             izz="${(1.0/12.0) * mass * (x*x + y*y)}"/> <!-- [kg m^2] ... -->
   </xacro:macro>
 
   <!--
@@ -70,7 +70,7 @@
 
     <joint name="${robot_namespace}/base_joint" type="fixed">
       <origin xyz="0 0 0" rpy="0 0 0"/>
-      <parent link="${robot_namespace}/baselink"/>
+      <parent link="${robot_namespace}/base_link"/>
       <child link="${robot_namespace}/base_link_inertia"/>
     </joint>
   </xacro:macro>
