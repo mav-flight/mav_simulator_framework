@@ -1,2 +1,2 @@
-# rotors_simulator
+# quadrotor_simulator
 RotorS is a UAV gazebo simulator
