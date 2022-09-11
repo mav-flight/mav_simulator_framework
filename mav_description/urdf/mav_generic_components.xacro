@@ -15,3 +15,5 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+</robot>

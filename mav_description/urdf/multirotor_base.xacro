@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<!--
+  Copyright 2022 Suresh G
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <!--
+    Macro for the inertia of a box (cuboid)
+    reference https://en.wikipedia.org/wiki/List_of_moments_of_inertia
+  -->
+  <xacro:macro name="box_inertia" params="x y z mass">
+    <inertia ixx="${(1.0/12.0) * mass * (y*y + z*z)}" ixy="0.0" ixz="0.0"
+             iyy="${(1.0/12.0) * mass * (x*x + z*z)}" iyz="0.0"
+             izz="${(1.0/12.0) * mass * (x*x + y*y)}"/>
+  </xacro:macro>
+
+  <!--
+    Macro for the inertial properties of a box (cuboid)
+  -->
+  <xacro:macro name="box_inertial" params="x y z mass *origin">
+    <inertial>
+      <mass value="${mass}"/>
+      <xacro:insert_block name="origin"/>
+      <xacro:box_inertia x="${x}" y="${y}" z="${z}" mass="${mass}"/>
+    </inertial>
+  </xacro:macro>
+
+  <!--
+    Macro for the multirotor's body/base
+  -->
+  <xacro:macro name="multirotor_base_xacro"
+    params="robot_namespace mass length width heigth mesh_file *inertia">
+
+    <link name="${robot_namespace}/base_link">
+    </link>
+
+    <link name="${robot_namespace}/base_link_inertia">
+      <inertial>
+        <mass value="${mass}"/> <!-- [kg] -->
+        <origin xyz="0 0 0"/>
+        <xacro:insert_block name="inertia"/>
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="${mesh_file}" scale="1 1 1"/>
+        </geometry>
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <box size="${length} ${width} ${height}"/> <!-- [m] [m] [m] -->
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${robot_namespace}/base_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <parent link="${robot_namespace}/baselink"/>
+      <child link="${robot_namespace}/base_link_inertia"/>
+    </joint>
+  </xacro:macro>
+</robot>
