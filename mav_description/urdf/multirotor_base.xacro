@@ -40,7 +40,7 @@
   <!--
     Macro for the multirotor's body/base
   -->
-  <xacro:macro name="multirotor_base_xacro"
+  <xacro:macro name="multirotor_base"
     params="robot_namespace mass length width heigth mesh_file *inertia">
 
     <link name="${robot_namespace}/base_link">
@@ -73,5 +73,31 @@
       <parent link="${robot_namespace}/baselink"/>
       <child link="${robot_namespace}/base_link_inertia"/>
     </joint>
+  </xacro:macro>
+
+  <!--
+    Macro for the multirotor's vertical rotor
+  -->
+  <xacro:macro name="vertical_rotor"
+    params="robot_namespace suffix direction parent mass radius id color *origin *inertia">
+    <link name="${robot_namespace}/rotor_${id}">
+      <inertial>
+        <mass value="${mass}"/> <!-- [kg] -->
+        <xacro:insert_block name="inertia"/>
+      </inertial>
+
+      <visual>
+        <geometry>
+          <mesh filename="package://mav_description/meshes/propeller_${direction}.dae"
+            scale="${radius} ${radius} ${radius}"/> <!-- [m] [m] [m] -->
+        </geometry>
+      </visual>
+
+      <collision>
+        <geometry>
+          <cylinder length="0.005" radius="${radius}"/> <!-- [m] -->
+        </geometry>
+      </collision>
+    </link>
   </xacro:macro>
 </robot>
