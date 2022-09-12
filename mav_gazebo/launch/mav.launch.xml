@@ -34,7 +34,7 @@
   </include>
 
   <!-- -->
-  <group ns="$(var mav_name)">
+  <group scoped="true">
     <include file="$(find-pkg-share mav_gazebo)/launch/spawn_mav.launch.xml">
       <arg name="mav_name" value="$(var mav_name)"/>
       <arg name="mav_model" value="$(find-pkg-share mav_description)/urdf/$(var mav_name).xacro"/>

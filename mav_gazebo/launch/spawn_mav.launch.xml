@@ -19,5 +19,20 @@
   <!-- Spawn Arguments -->
   <arg name="mav_name" default="hummingbird"/>
   <arg name="namespace" default="$(var mav_name)"/>
-  <arg name="mav_model" default="$(find-pkg-share mav_description)/urdf/$(var mav_name).xacro"/>
+  <arg name="mav_model" default="$(find-pkg-share mav_description)/urdf/$(var mav_name).urdf.xacro"/>
+  <arg name="x" default="0.0"/>
+  <arg name="y" default="0.0"/>
+  <arg name="z" default="0.1"/>
+
+  <!-- -->
+  <param name="robot_description" command="
+    $(find-pkg-share xacro)/xacro '$(var mav_model)'
+    namespace:=$(var namespace)"/>
+
+  <!-- -->
+  <node name="spawn_$(var namespace)" pkg="gazebo_ros" type="spawn_model"
+    args="-param robot_description
+          -urdf
+          -x $(var x) -y $(var y) -z $(var z)
+          -model $(var namespace)" respawn="false" output="screen"/>
 </launch>

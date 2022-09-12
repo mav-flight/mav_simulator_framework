@@ -9,8 +9,11 @@
 
   <buildtool_depend condition="$ROS_VERSION == 2">ament_cmake</buildtool_depend>
 
+  <depend condition="$ROS_VERSION == 2">gazebo_ros</depend>
+  <depend condition="$ROS_VERSION == 2">mav_description</depend>
+  <depend condition="$ROS_VERSION == 2">xacro</depend>
+
   <exec_depend condition="$ROS_VERSION == 2">ros2launch</exec_depend>
-  <exec_depend condition="$ROS_VERSION == 2">gazebo_ros</exec_depend>
 
   <test_depend condition="$ROS_VERSION == 2">ament_lint_auto</test_depend>
   <test_depend condition="$ROS_VERSION == 2">ament_lint_common</test_depend>
