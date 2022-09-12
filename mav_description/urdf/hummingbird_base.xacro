@@ -27,7 +27,7 @@
   <xacro:property name="body_width" value="0.1"/> <!-- [m] -->
   <xacro:property name="body_height" value="0.12"/> <!-- [m] -->
   <xacro:property name="rotor_mass" value="0.009"/> <!-- [kg] -->
-  <xacro:property name="rotor_radius" value="0.1"> <!-- [m] -->
+  <xacro:property name="rotor_radius" value="0.1"/> <!-- [m] -->
   <xacro:property name="arm_length" value="0.17"/> <!-- [m] -->
   <xacro:property name="robot_z_offset" value="0.01"/> <!-- [m]-->
 
@@ -51,7 +51,7 @@
   <!--
     Include the multirotor base xacro
   -->
-  <xacro:include filename="$(find mav_description)/urdf/multirotor_base.xacro"/>
+  <xacro:include filename="$(find-pkg-share mav_description)/urdf/multirotor_base.xacro"/>
 
   <!--
     Instantiate the multirotor_base macro
