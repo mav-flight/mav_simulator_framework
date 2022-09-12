@@ -15,7 +15,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<robot xmlns:xacro="http://ros.org/wiki/xacro">
+<robot name="hummingbird" xmlns:xacro="http://ros.org/wiki/xacro">
   <!--
     Properties for the Asctec Hummingbird
     reference Novel Dynamic Inversion Architectur Design for Quadrocopter Control by Wang et al.
@@ -34,7 +34,7 @@
   <!--
     Include the multirotor base xacro
   -->
-  <xacro:include filename="$(find mav_description)/urdf/multirotor_base.xacro"/>
+  <xacro:include filename="$(find mav_description)/urdf/multirotor_base.urdf.xacro"/>
 
   <!--
     Property for the body's inertia
@@ -56,7 +56,7 @@
   <!--
     Instantiate the multirotor_base macro
   -->
-  <xacro:multirotor_base robot_namespace="${namespace}" mass="${mass}"
+  <xacro:multirotor_base robot_namespace="${namespace}" mass="${body_mass}"
     length="${body_length}" width="${body_width}" height="${body_height}"
     mesh_file="${mav_mesh_file}">
     <xacro:insert_block name="body_inertia"/>

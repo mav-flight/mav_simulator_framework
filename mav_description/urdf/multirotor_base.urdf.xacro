@@ -41,7 +41,7 @@
     Macro for the multirotor's body/base
   -->
   <xacro:macro name="multirotor_base"
-    params="robot_namespace mass length width heigth mesh_file *inertia">
+    params="robot_namespace mass length width height mesh_file *inertia">
 
     <link name="${robot_namespace}/base_link">
     </link>
