@@ -32,6 +32,11 @@
   <xacro:property name="robot_z_offset" value="0.01"/> <!-- [m]-->
 
   <!--
+    Include the multirotor base xacro
+  -->
+  <xacro:include filename="$(find mav_description)/urdf/multirotor_base.xacro"/>
+
+  <!--
     Property for the body's inertia
   -->
   <xacro:property name="body_inertia">
@@ -46,12 +51,7 @@
   <xacro:property name="robot_inertia">
     <xacro:box_inertia x="${rotor_radius}" y="0.015" z="0.003"
       mass="${rotor_mass}"/>
-  </xacro:property/>
-
-  <!--
-    Include the multirotor base xacro
-  -->
-  <xacro:include filename="$(find-pkg-share mav_description)/urdf/multirotor_base.xacro"/>
+  </xacro:property>
 
   <!--
     Instantiate the multirotor_base macro
