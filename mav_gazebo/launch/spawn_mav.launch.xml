@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<!--
+  Copyright 2022 Suresh G
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<launch>
+  <!-- Spawn Arguments -->
+  <arg name="mav_name" default="hummingbird"/>
+  <arg name="namespace" default="$(var mav_name)"/>
+  <arg name="mav_model" default="$(find-pkg-share mav_description)/urdf/$(var mav_name).xacro"/>
+</launch>

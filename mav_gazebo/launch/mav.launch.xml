@@ -17,6 +17,7 @@
 -->
 <launch>
   <!-- Launch Arguments -->
+  <arg name="mav_name" default="hummingbird"/>
   <arg name="world_name" default="basic"/>
   <arg name="debug" default="false"/>
   <arg name="gui" default="true"/>
@@ -31,4 +32,12 @@
     <arg name="gui" value="$(var gui)"/>
     <arg name="verbose" value="$(var verbose)"/>
   </include>
+
+  <!-- -->
+  <group ns="$(var mav_name)">
+    <include file="$(find-pkg-share mav_gazebo)/launch/spawn_mav.launch.xml">
+      <arg name="mav_name" value="$(var mav_name)"/>
+      <arg name="mav_model" value="$(find-pkg-share mav_description)/urdf/$(var mav_name).xacro"/>
+    </include>
+  </group>
 </launch>
