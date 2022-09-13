@@ -24,7 +24,7 @@ if(${ROS_VERSION} EQUAL 2)
   find_package(xacro REQUIRED)
 
   install(
-    DIRECTORY launch meshes urdf
+    DIRECTORY meshes urdf
     DESTINATION share/${PROJECT_NAME}
   )
 
