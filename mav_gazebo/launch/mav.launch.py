@@ -22,14 +22,29 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 def generate_launch_description():
 
     # Launch files
-    gz_launch = IncludeLaunchDescription(PythonLaunchDescriptionSource(
-        os.path.join(get_package_share_directory("gazebo_ros"), "launch",
-        "gazebo.launch.py")))
+    gz_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(get_package_share_directory("gazebo_ros"), "launch",
+            "gazebo.launch.py")),
+        launch_arguments={
+            "gui": "True",
+            "server": "True"
+        }.items())
+    mav_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(get_package_share_directory("mav_gazebo"), "launch",
+            "spawn_mav.launch.py")),
+        launch_arguments={
+            "initial_pose_x": "0.0",
+            "initial_pose_y": "0.0",
+            "initial_pose_z": "0.5"
+        }.items())
 
     # Define LaunchDescription variable
     ld = LaunchDescription()
 
     # Add nodes to LaunchDescription
     ld.add_action(gz_launch)
+    ld.add_action(mav_launch)
 
     return ld
