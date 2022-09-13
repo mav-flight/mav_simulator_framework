@@ -100,11 +100,11 @@
       </collision>
     </link>
 
-    <joint name="${robot_namespace}/robot_${id}_joint" type="continuous">
+    <joint name="${robot_namespace}/rotor_${id}_joint" type="continuous">
       <xacro:insert_block name="origin"/>
       <axis xyz="0 0 1"/>
       <parent link="${parent}"/>
-      <child link="${robot_namespace}/robot_${id}"/>
+      <child link="${robot_namespace}/rotor_${id}"/>
     </joint>
   </xacro:macro>
 </robot>
