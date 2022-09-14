@@ -106,5 +106,9 @@
       <parent link="${parent}"/>
       <child link="${robot_namespace}/rotor_${id}"/>
     </joint>
+
+    <gazebo reference="${robot_namespace}/rotor_${id}">
+      <material>Gazebo/${color}</material>
+    </gazebo>
   </xacro:macro>
 </robot>
