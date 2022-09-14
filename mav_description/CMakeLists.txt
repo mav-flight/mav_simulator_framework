@@ -21,7 +21,6 @@ if(${ROS_VERSION} EQUAL 2)
 
   # find dependencies
   find_package(ament_cmake REQUIRED)
-  find_package(xacro REQUIRED)
 
   install(
     DIRECTORY meshes urdf

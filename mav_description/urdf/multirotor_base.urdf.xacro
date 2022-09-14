@@ -88,7 +88,7 @@
 
       <visual>
         <geometry>
-          <mesh filename="package://mav_description/meshes/propeller_${direction}.dae"
+          <mesh filename="file://$(find mav_description)/meshes/propeller_${direction}.dae"
             scale="${radius} ${radius} ${radius}"/> <!-- [m] [m] [m] -->
         </geometry>
       </visual>
