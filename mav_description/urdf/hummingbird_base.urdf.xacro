@@ -29,7 +29,7 @@
   <xacro:property name="rotor_mass" value="0.009"/> <!-- [kg] -->
   <xacro:property name="rotor_radius" value="0.1"/> <!-- [m] -->
   <xacro:property name="arm_length" value="0.17"/> <!-- [m] -->
-  <xacro:property name="robot_z_offset" value="0.01"/> <!-- [m]-->
+  <xacro:property name="rotor_z_offset" value="0.01"/> <!-- [m]-->
 
   <!--
     Include the multirotor base xacro
@@ -46,9 +46,9 @@
   </xacro:property>
 
   <!--
-    Property for the single robot's inertia, assuming a cuboid shape
+    Property for the single rotor's inertia, assuming a cuboid shape
   -->
-  <xacro:property name="robot_inertia">
+  <xacro:property name="rotor_inertia">
     <xacro:box_inertia x="${rotor_radius}" y="0.015" z="0.003"
       mass="${rotor_mass}"/>
   </xacro:property>
@@ -68,8 +68,8 @@
   <xacro:vertical_rotor robot_namespace="${namespace}" suffix="front"
     direction="cw" parent="${namespace}/base_link" mass="${rotor_mass}"
     radius="${rotor_radius}" id="0" color="Red">
-    <origin xyz="${arm_length} 0 ${robot_z_offset}" rpy="0 0 0"/>
-    <xacro:insert_block name="robot_inertia"/>
+    <origin xyz="${arm_length} 0 ${rotor_z_offset}" rpy="0 0 0"/>
+    <xacro:insert_block name="rotor_inertia"/>
   </xacro:vertical_rotor>
 
   <!--
@@ -78,8 +78,8 @@
   <xacro:vertical_rotor robot_namespace="${namespace}" suffix="left"
     direction="ccw" parent="${namespace}/base_link" mass="${rotor_mass}"
     radius="${rotor_radius}" id="1" color="Blue">
-    <origin xyz="0 ${arm_length} ${robot_z_offset}" rpy="0 0 0"/>
-    <xacro:insert_block name="robot_inertia"/>
+    <origin xyz="0 ${arm_length} ${rotor_z_offset}" rpy="0 0 0"/>
+    <xacro:insert_block name="rotor_inertia"/>
   </xacro:vertical_rotor>
 
   <!--
@@ -88,8 +88,8 @@
   <xacro:vertical_rotor robot_namespace="${namespace}" suffix="back"
     direction="cw" parent="${namespace}/base_link" mass="${rotor_mass}"
     radius="${rotor_radius}" id="2" color="Blue">
-    <origin xyz="-${arm_length} 0 ${robot_z_offset}" rpy="0 0 0"/>
-    <xacro:insert_block name="robot_inertia"/>
+    <origin xyz="-${arm_length} 0 ${rotor_z_offset}" rpy="0 0 0"/>
+    <xacro:insert_block name="rotor_inertia"/>
   </xacro:vertical_rotor>
 
   <!--
@@ -98,7 +98,7 @@
   <xacro:vertical_rotor robot_namespace="${namespace}" suffix="right"
     direction="ccw" parent="${namespace}/base_link" mass="${rotor_mass}"
     radius="${rotor_radius}" id="3" color="Blue">
-    <origin xyz="0 -${arm_length} ${robot_z_offset}" rpy="0 0 0"/>
-    <xacro:insert_block name="robot_inertia"/>
+    <origin xyz="0 -${arm_length} ${rotor_z_offset}" rpy="0 0 0"/>
+    <xacro:insert_block name="rotor_inertia"/>
   </xacro:vertical_rotor>
 </robot>
