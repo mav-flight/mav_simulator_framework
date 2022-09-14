@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""
+     Spawn mav model with command line arguments.
+"""
+
 import os
 import xacro
 
@@ -48,6 +52,10 @@ ARGUMENTS = [
 ]
 
 def generate_launch_description():
+    """
+    Returns:
+        An instance of LaunchDescription class.
+    """
     # robot state publisher node
     rsp_node = Node(package="robot_state_publisher",
                     executable="robot_state_publisher",

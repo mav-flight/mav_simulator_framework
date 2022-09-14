@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""
+     Launch gazebo with spawned mav model.
+"""
+
 import os
 
 from ament_index_python.packages import get_package_share_directory
@@ -20,7 +24,10 @@ from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 def generate_launch_description():
-
+    """
+    Returns:
+        An instance of LaunchDescription class.
+    """
     # Launch files
     gz_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
