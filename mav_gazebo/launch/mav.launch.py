@@ -31,11 +31,13 @@ def generate_launch_description():
     # Launch files
     gz_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(get_package_share_directory("gazebo_ros"), "launch",
-            "gazebo.launch.py")),
+            os.path.join(get_package_share_directory("mav_gazebo"), "launch",
+            "empty_world.launch.py")),
         launch_arguments={
-            "gui": "True",
-            "server": "True"
+            "world": "",
+            "gui": "true",
+            "verbose": "true",
+            "pause": "true"
         }.items())
     mav_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
