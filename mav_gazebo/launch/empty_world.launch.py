@@ -45,8 +45,10 @@ from launch.actions import IncludeLaunchDescription
 from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions.launch_configuration import LaunchConfiguration
+from typing import List
 
-ARGUMENTS = [
+## The launch description's initial arguments
+ARGUMENTS: List[DeclareLaunchArgument] = [
     DeclareLaunchArgument(name="world",
                           default_value="",
                           description="Specify the world file name"),
@@ -64,7 +66,7 @@ ARGUMENTS = [
                           description="Whether to start the gzserver in a paused state"),
 ]
 
-def generate_launch_description():
+def generate_launch_description() -> LaunchDescription:
     """ Generate custom launch description.
 
     @return

@@ -45,7 +45,7 @@ from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 
-def generate_launch_description():
+def generate_launch_description() -> LaunchDescription:
     """ Generate custom launch description.
 
     @return

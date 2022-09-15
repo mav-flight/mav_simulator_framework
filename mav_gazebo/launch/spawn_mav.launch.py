@@ -47,8 +47,10 @@ from launch.actions import DeclareLaunchArgument
 from launch.substitutions import Command
 from launch.substitutions.launch_configuration import LaunchConfiguration
 from launch_ros.actions import Node
+from typing import List
 
-ARGUMENTS = [
+## The launch description's initial arguments
+ARGUMENTS: List[DeclareLaunchArgument] = [
     DeclareLaunchArgument(name="mav_name",
                           default_value="hummingbird",
                           description="MAV model name"),
@@ -73,7 +75,7 @@ ARGUMENTS = [
                           description="Whether to use the simulation time"),
 ]
 
-def generate_launch_description():
+def generate_launch_description() -> LaunchDescription:
     """ Generate custom launch description.
 
     @return
