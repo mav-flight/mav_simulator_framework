@@ -4,10 +4,21 @@
 ##
 # @file empty_world.launch.py
 #
-# @brief
+# @brief Defines a launch description for gazebo server and client.
+#
+# @section description_empty_world Description
+# Generates a custom launch description for gazebo server and client with
+# command line arguments.
+#
+# @section notes_empty_world Notes
+# None
+#
+# @section todo_empty_world TODO
+# None
 #
 # @section author_empty_world Author(s)
-# - Created by Jose Luis Rivero, Louise Poubel
+# - Created  by Jose Luis Rivero
+# - Created  by Louise Poubel
 # - Modified by Suresh G
 #
 # Copyright 2022 Suresh G
@@ -54,8 +65,9 @@ ARGUMENTS = [
 ]
 
 def generate_launch_description():
-    """
-    Returns:
+    """ Generate custom launch description.
+
+    @return
         An instance of LaunchDescription class.
     """
     # Launch files
