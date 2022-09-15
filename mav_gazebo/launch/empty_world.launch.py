@@ -1,3 +1,15 @@
+#!/usr/bin/env python3
+""" Launch gazebo server and client with command line arguments."""
+
+##
+# @file empty_world.launch.py
+#
+# @brief
+#
+# @section author_empty_world Author(s)
+# - Created by Jose Luis Rivero, Louise Poubel
+# - Modified by Suresh G
+#
 # Copyright 2022 Suresh G
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,10 +24,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-     Launch gabebo server and client with command line arguments.
-"""
-
+# Imports
 import os
 
 from ament_index_python.packages import get_package_share_directory
