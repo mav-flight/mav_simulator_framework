@@ -7,6 +7,12 @@
   <maintainer email="4303534+suresh-guttikonda@users.noreply.github.com">Suresh G</maintainer>
   <license>Apache License 2.0</license>
 
+  <author>Fadri Furrer</author>
+  <author>Michael Burri</author>
+  <author>Mina Kamel</author>
+  <author>Janosch Nikolic</author>
+  <author>Markus Achtelik</author>
+  
   <buildtool_depend condition="$ROS_VERSION == 2">ament_cmake</buildtool_depend>
 
   <depend condition="$ROS_VERSION == 2">gazebo_ros</depend>

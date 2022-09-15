@@ -1,24 +1,24 @@
 #!/usr/bin/env python3
-""" Launch gazebo server and client with command line arguments."""
+""" Launch gazebo server and client with command line arguments. """
 
 ##
 # @file empty_world.launch.py
 #
 # @brief Defines a launch description for gazebo server and client.
 #
-# @section description_empty_world Description
+# @section description_empty_world_launch Description
 # Generates a custom launch description for gazebo server and client with
 # command line arguments.
 #
-# @section notes_empty_world Notes
+# @section notes_empty_world_launch Notes
 # None
 #
-# @section todo_empty_world TODO
+# @section todo_empty_world_launch TODO
 # None
 #
-# @section author_empty_world Author(s)
-# - Created  by Jose Luis Rivero
-# - Created  by Louise Poubel
+# @section author_empty_world_launch Author(s)
+# - Created  by Jose Luis Rivero, Open Source Robotics Foundation, Inc.
+# - Created  by Louise Poubel, Open Source Robotics Foundation, Inc.
 # - Modified by Suresh G
 #
 # Copyright 2022 Suresh G
@@ -70,7 +70,7 @@ def generate_launch_description():
     @return
         An instance of LaunchDescription class.
     """
-    # Launch files
+    # gazebo server
     gzserver_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(get_package_share_directory("gazebo_ros"), "launch",
@@ -80,6 +80,8 @@ def generate_launch_description():
             "verbose": LaunchConfiguration("verbose"),
             "pause": LaunchConfiguration("pause")
         }.items())
+
+    # gazebo client
     gzclient_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(get_package_share_directory("gazebo_ros"), "launch",
