@@ -109,7 +109,7 @@
 
     <gazebo>
       <plugin name="${robot_namespace}_${suffix}_motor_model"
-        filename="librgazebo_ros_motor_model.so">
+        filename="libgazebo_ros_motor_model.so">
       </plugin>
     </gazebo>
 
