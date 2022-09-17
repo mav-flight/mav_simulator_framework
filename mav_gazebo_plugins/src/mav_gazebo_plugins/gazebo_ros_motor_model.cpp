@@ -26,6 +26,47 @@
  */
 #include "mav_gazebo_plugins/gazebo_ros_motor_model.h"
 
-namespace mav_gazebo_plugins {
+// C headers
+#include <gazebo_ros/node.hpp>
 
+namespace mav_gazebo_plugins {
+/// @brief  Class to hold private date members (PIMPL patter)
+class GazeboRosMotorModelPrivate {
+ public:
+      ////////////////////////////////////////
+      ////////////  Class Members  ///////////
+      ////////////////////////////////////////
+
+  /// Pointer to parent model.
+  gazebo::physics::ModelPtr model_;
+
+  /// Pointer to ROS node for communication.
+  gazebo_ros::Node::SharedPtr ros_node_;
+};  // class GazeboRosMotorModelPrivate
+
+///
+GazeboRosMotorModel::GazeboRosMotorModel()
+    : impl_(std::make_unique<GazeboRosMotorModelPrivate>()) {
+}
+
+///
+GazeboRosMotorModel::~GazeboRosMotorModel() {
+}
+
+///
+void GazeboRosMotorModel::Load(gazebo::physics::ModelPtr _model,
+                               sdf::ElementPtr _sdf) {
+  // Initialize model
+  impl_->model_ = _model;
+
+  // Initialize GazeboROS node from SDF parameters
+  impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
+}
+
+///
+void GazeboRosMotorModel::OnUpdate() {
+}
+
+// Register this plugin with the simulator
+GZ_REGISTER_MODEL_PLUGIN(GazeboRosMotorModel)
 }  // namespace mav_gazebo_plugins
