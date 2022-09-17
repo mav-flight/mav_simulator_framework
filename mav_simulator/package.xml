@@ -13,7 +13,14 @@
   <author>Janosch Nikolic</author>
   <author>Markus Achtelik</author>
 
+  <url type="bugtracker">https://github.com/mav-flight/mav_simulator_framework/issues</url>
+  <url type="repository">https://github.com/mav-flight/mav_simulator_framework</url>
+
   <buildtool_depend condition="$ROS_VERSION == 2">ament_cmake</buildtool_depend>
+
+  <exec_depend>mav_description</exec_depend>
+  <exec_depend>mav_gazebo</exec_depend>
+  <exec_depend>mav_gazebo_plugins</exec_depend>
 
   <test_depend condition="$ROS_VERSION == 2">ament_lint_auto</test_depend>
   <test_depend condition="$ROS_VERSION == 2">ament_lint_common</test_depend>

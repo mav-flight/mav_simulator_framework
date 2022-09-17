@@ -21,8 +21,11 @@ if(${ROS_VERSION} EQUAL 2)
 
   # find dependencies
   find_package(ament_cmake REQUIRED)
-  find_package(gazebo_plugins REQUIRED)
+  find_package(gazebo_dev REQUIRED)
   find_package(gazebo_ros REQUIRED)
+
+  include_directories(${GAZEBO_INCLUDE_DIRS})
+  link_directories(${GAZEBO_LIBRARY_DIRS})
 
   option(ENABLE_PROFILER "Enable Ignition Profiler" FALSE)
 
@@ -34,17 +37,21 @@ if(${ROS_VERSION} EQUAL 2)
     gazebo_ros_motor_model PUBLIC include
   )
   ament_target_dependencies(gazebo_ros_motor_model
-    gazebo_plugins
+    gazebo_dev
+    gazebo_ros
   )
   ament_export_libraries(gazebo_ros_motor_model)
   if(ENABLE_PROFILER)
     target_include_directories(
-      gazebo_ros_diff_drive PUBLIC ${ignition-common3_INCLUDE_DIRS}
+      gazebo_ros_motor_model PUBLIC ${ignition-common3_INCLUDE_DIRS}
     )
     target_link_libraries(
-      gazebo_ros_diff_drive ${ignition-common3_LIBRARIES}
+      gazebo_ros_motor_model ${ignition-common3_LIBRARIES}
     )
   endif()
+
+  ament_export_dependencies(gazebo_dev)
+  ament_export_dependencies(gazebo_ros)
 
   if(BUILD_TESTING)
     find_package(ament_lint_auto REQUIRED)
@@ -52,4 +59,14 @@ if(${ROS_VERSION} EQUAL 2)
   endif()
 
   ament_package()
+
+  install(DIRECTORY include/
+          DESTINATION include)
+
+  install(TARGETS
+      gazebo_ros_motor_model
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin)
+
 endif()

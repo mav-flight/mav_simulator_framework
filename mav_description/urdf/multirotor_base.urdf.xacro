@@ -107,6 +107,12 @@
       <child link="${robot_namespace}/rotor_${id}"/>
     </joint>
 
+    <gazebo>
+      <plugin name="${robot_namespace}_${suffix}_motor_model"
+        filename="librgazebo_ros_motor_model.so">
+      </plugin>
+    </gazebo>
+
     <gazebo reference="${robot_namespace}/rotor_${id}">
       <material>Gazebo/${color}</material>
     </gazebo>

@@ -12,11 +12,15 @@
   <author>Mina Kamel</author>
   <author>Janosch Nikolic</author>
   <author>Markus Achtelik</author>
+
+  <url type="bugtracker">https://github.com/mav-flight/mav_simulator_framework/issues</url>
+  <url type="repository">https://github.com/mav-flight/mav_simulator_framework</url>
   
   <buildtool_depend condition="$ROS_VERSION == 2">ament_cmake</buildtool_depend>
 
   <depend condition="$ROS_VERSION == 2">gazebo_ros</depend>
   <depend condition="$ROS_VERSION == 2">mav_description</depend>
+  <depend condition="$ROS_VERSION == 2">mav_gazebo_plugins</depend>
   <depend condition="$ROS_VERSION == 2">robot_state_publisher</depend>
   <depend condition="$ROS_VERSION == 2">xacro</depend>
 
