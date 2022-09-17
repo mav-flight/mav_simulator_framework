@@ -12,8 +12,11 @@
   <author>Mina Kamel</author>
   <author>Janosch Nikolic</author>
   <author>Markus Achtelik</author>
-  
+
   <buildtool_depend condition="$ROS_VERSION == 2">ament_cmake</buildtool_depend>
+
+  <depend condition="$ROS_VERSION == 2">gazebo_plugins</depend>
+  <depend condition="$ROS_VERSION == 2">gazebo_ros</depend>
 
   <test_depend condition="$ROS_VERSION == 2">ament_lint_auto</test_depend>
   <test_depend condition="$ROS_VERSION == 2">ament_lint_common</test_depend>
