@@ -26,6 +26,6 @@
  */
 #include "mav_gazebo_plugins/gazebo_ros_motor_model.h"
 
-namespace gazebo {
+namespace mav_gazebo_plugins {
 
-}  // namespace gazebo
+}  // namespace mav_gazebo_plugins

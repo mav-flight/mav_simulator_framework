@@ -1,19 +1,13 @@
 /*!
- * @mainpage MAV Simulator Framework
+ * @page mav_gazebo_plugins MAV Gazebo Custom Plugins Package
  *
- * This manual is divided into the following sections:
- * - @subpage mav_description
- * - @subpage mav_gazebo
- * - @subpage mav_gazebo_plugins
+ * @section description_mav_gazebo_plugins Description
+ * (TODO) Add special description here.
  *
- * @section description_mav_simulator Description
- * (TODO) Add special project description here.
+ * @section notes_mav_gazebo_plugins Notes
+ * (TODO) Add special notes here that you want to communicate to the user.
  *
- * @section notes_mav_simulator Notes
- * (TODO) Add special project notes here that you want to communicate to the
- *   user.
- *
- * @section author_mav_simulator Author(s)
+ * @section author_mav_gazebo_plugins Author(s)
  * - Created by Suresh G
  *
  * Copyright 2022 Suresh G

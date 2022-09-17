@@ -28,11 +28,24 @@
 
 // C headers
 #include <gazebo/common/Plugin.hh>
-#include <gazebo/physics/physics.hh>
 
-namespace gazebo {
+namespace mav_gazebo_plugins {
+// Forward declaration of private data class.
+class GazeboRosMotorModelPrivate;
 
-class GazeboRosMotorModel : public ModelPlugin {
+/// @brief  Class for custom gazebo rotor's motor model.
+/// @details  Attach plugin to a gazebo MAV rotor's and publish ROS message
+///           output.
+/// @note
+///   Example usage:
+///   @code{.xml}
+///     <gazebo>
+///       <plugin name="gazebo_ros_motor_model" filename="libgazebo_ros_motor_model.so">
+///       </plugin>
+///     </gazebo>
+///   @endcode
+///
+class GazeboRosMotorModel : public gazebo::ModelPlugin {
  public:
       ///////////////////////////////////////////////////
       //////////// Constructors & Destructors ///////////
@@ -45,9 +58,28 @@ class GazeboRosMotorModel : public ModelPlugin {
   virtual ~GazeboRosMotorModel();
 
   /// @brief  Load the plugin
-  /// @param[in]  _parent
-  /// @param[in]  _sdf
-  void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf);
+  /// @details  Gazebo calls this when the plugin is loaded.
+  /// @param[in]  _model  Pointer to parent model.
+  /// @param[in]  _sdf  SDF element containing user-defined parameters.
+  void Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _sdf) override;
+
+ protected:
+      //////////////////////////////////////
+      //////////// Class Methods ///////////
+      //////////////////////////////////////
+
+  /// @brief  Update callback
+  /// @details  Callback to be called at every simulation iteration.
+  virtual void OnUpdate();
+
+ private:
+      ////////////////////////////////////////
+      ////////////  Class Members  ///////////
+      ////////////////////////////////////////
+
+  /// Recommented PIMPL pattern.
+  /// This variable should hold all private data members.
+  std::unique_ptr<GazeboRosMotorModelPrivate> impl_;
 };  // class GazeboRosMotorModel
 
-}  // namespace gazebo
+}  // namespace mav_gazebo_plugins
