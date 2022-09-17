@@ -49,7 +49,8 @@ from launch.substitutions.launch_configuration import LaunchConfiguration
 from launch_ros.actions import Node
 from typing import List
 
-## The launch description's initial arguments
+## @cond PRIVATE
+# The launch description's initial arguments
 ARGUMENTS: List[DeclareLaunchArgument] = [
     DeclareLaunchArgument(name="mav_name",
                           default_value="hummingbird",
@@ -74,11 +75,12 @@ ARGUMENTS: List[DeclareLaunchArgument] = [
                           choices=["true", "false"],
                           description="Whether to use the simulation time"),
 ]
+## @endcond
 
 def generate_launch_description() -> LaunchDescription:
     """ Generate custom launch description.
 
-    @return
+    Returns:
         An instance of LaunchDescription class.
     """
     # robot state publisher node

@@ -47,7 +47,8 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions.launch_configuration import LaunchConfiguration
 from typing import List
 
-## The launch description's initial arguments
+## @cond PRIVATE
+# The launch description's initial arguments
 ARGUMENTS: List[DeclareLaunchArgument] = [
     DeclareLaunchArgument(name="world",
                           default_value="",
@@ -65,11 +66,12 @@ ARGUMENTS: List[DeclareLaunchArgument] = [
                           choices=["true", "false"],
                           description="Whether to start the gzserver in a paused state"),
 ]
+## @endcond
 
 def generate_launch_description() -> LaunchDescription:
     """ Generate custom launch description.
 
-    @return
+    Returns
         An instance of LaunchDescription class.
     """
     # gazebo server

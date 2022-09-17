@@ -48,7 +48,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 def generate_launch_description() -> LaunchDescription:
     """ Generate custom launch description.
 
-    @return
+    Returns
         An instance of LaunchDescription class.
     """
     # gazebo world
