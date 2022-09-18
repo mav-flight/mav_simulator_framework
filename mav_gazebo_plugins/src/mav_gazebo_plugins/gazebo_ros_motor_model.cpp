@@ -75,6 +75,9 @@ class GazeboRosMotorModelPrivate {
   /// Motor speed publisher.
   rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr motor_speed_pub_;
 
+  /// Motor rotating speed.
+  std_msgs::msg::Float32 speed_;
+
   /// Protect variables accessed on callbacks.
   std::mutex lock_;
 
@@ -195,7 +198,8 @@ void GazeboRosMotorModelPrivate::OnUpdate(
     #ifdef IGN_PROFILER_ENABLE
       IGN_PROFILE_BEGIN("publish motor_speed");
     #endif
-    motor_speed_pub_->publish(joint_->GetVelocity(0));
+    speed_.data = joint_->GetVelocity(0);
+    motor_speed_pub_->publish(speed_);
     #ifdef IGN_PROFILER_ENABLE
       IGN_PROFILE_END();
     #endif
