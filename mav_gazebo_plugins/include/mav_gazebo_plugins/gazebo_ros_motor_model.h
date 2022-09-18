@@ -38,6 +38,12 @@ enum class MotorControlType {
   kRotationSpeed = 0,
 };
 
+/// Time constant used when accelerating
+static constexpr double kDefaultTimeConstantUp = 1.0 / 80.0;
+
+/// Time constant used when decelerating
+static constexpr double kDefaultTimeConstantDown = 1.0 / 40.0;
+
 // Forward declaration of private data class.
 /// @class  GazeboRosMotorModelPrivate
 class GazeboRosMotorModelPrivate;
@@ -97,5 +103,4 @@ class GazeboRosMotorModel : public gazebo::ModelPlugin {
   /// This variable should hold all private data members.
   std::unique_ptr<GazeboRosMotorModelPrivate> impl_;
 };  // class GazeboRosMotorModel
-
 }  // namespace mav_gazebo_plugins

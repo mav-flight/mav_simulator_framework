@@ -40,10 +40,23 @@
 #endif
 #include <std_msgs/msg/float32.hpp>
 
+// Custom headers
+#include "mav_gazebo_plugins/gazebo_ros_common.h"
+
 namespace mav_gazebo_plugins {
 /// @brief  Class to hold private date members (PIMPL patter)
 class GazeboRosMotorModelPrivate {
  public:
+      ///////////////////////////////////////////////////
+      //////////// Constructors & Destructors ///////////
+      ///////////////////////////////////////////////////
+
+   /// @brief  Default Constructor
+   GazeboRosMotorModelPrivate();
+
+   /// @brief  Destructor
+   ~GazeboRosMotorModelPrivate();
+
       //////////////////////////////////////
       //////////// Class Methods ///////////
       //////////////////////////////////////
@@ -79,8 +92,14 @@ class GazeboRosMotorModelPrivate {
   /// Motor control type.
   MotorControlType ctrl_type_;
 
+  /// Motor control input
+  double ref_ctrl_input_;
+
   /// Motor speed publisher.
   rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr motor_speed_pub_;
+
+  /// First order filter for rotor speed.
+  std::unique_ptr<FirstOrderFilter<double>> rotor_speed_filter_;
 
   /// Motor rotating speed.
   std_msgs::msg::Float32 speed_msg_;
@@ -199,7 +218,7 @@ void GazeboRosMotorModel::Load(gazebo::physics::ModelPtr _model,
   // Get update rate
   auto update_rate = _sdf->Get<double>("update_rate", 0.0).first;
   if (update_rate > 0.0) {
-    impl_->update_period_ = 1.0/update_rate;
+    impl_->update_period_ = 1.0 / update_rate;
   }
   impl_->last_update_time_ = impl_->model_->GetWorld()->SimTime();
 
@@ -218,6 +237,26 @@ void GazeboRosMotorModel::Load(gazebo::physics::ModelPtr _model,
   impl_->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&GazeboRosMotorModelPrivate::OnUpdate, impl_.get(),
               std::placeholders::_1));
+
+  // Create the first order filter.
+  impl_->rotor_speed_filter_.reset(new FirstOrderFilter<double>(
+    /*time_const_up=*/kDefaultTimeConstantUp,
+    /*time_const_down=*/kDefaultTimeConstantDown,
+    /*initial_state=*/impl_->ref_ctrl_input_));
+}
+
+///
+GazeboRosMotorModelPrivate::GazeboRosMotorModelPrivate()
+    : rotation_sign_(0),
+      ctrl_type_(MotorControlType::kRotationSpeed),
+      ref_ctrl_input_(0.0),
+      publish_speed_(false),
+      update_period_(0.0),
+      sampling_time_(0.0) {
+}
+
+///
+GazeboRosMotorModelPrivate::~GazeboRosMotorModelPrivate() {
 }
 
 ///
@@ -255,6 +294,11 @@ void GazeboRosMotorModelPrivate::OnUpdate(
   #ifdef IGN_PROFILER_ENABLE
     IGN_PROFILE_BEGIN("update");
   #endif
+
+  // Apply the first order filter on the motor's speed.
+  double rotation_speed = rotor_speed_filter_->UpdateFilter(
+    /*input_state=*/ref_ctrl_input_, /*sampling_time=*/sampling_time_);
+
   last_update_time_ = current_time;
   #ifdef IGN_PROFILER_ENABLE
     IGN_PROFILE_END();
