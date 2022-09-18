@@ -21,6 +21,7 @@
   <depend condition="$ROS_VERSION == 2">gazebo_dev</depend>
   <depend condition="$ROS_VERSION == 2">gazebo_ros</depend>
   <depend condition="$ROS_VERSION == 2">rclcpp</depend>
+  <depend condition="$ROS_VERSION == 2">std_msgs</depend>
 
   <test_depend condition="$ROS_VERSION == 2">ament_lint_auto</test_depend>
   <test_depend condition="$ROS_VERSION == 2">ament_lint_common</test_depend>

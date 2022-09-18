@@ -24,6 +24,7 @@ if(${ROS_VERSION} EQUAL 2)
   find_package(gazebo_dev REQUIRED)
   find_package(gazebo_ros REQUIRED)
   find_package(rclcpp REQUIRED)
+  find_package(std_msgs REQUIRED)
 
   option(ENABLE_PROFILER "Enable Ignition Profiler" FALSE)
 
@@ -38,6 +39,7 @@ if(${ROS_VERSION} EQUAL 2)
     gazebo_dev
     gazebo_ros
     rclcpp
+    std_msgs
   )
   ament_export_libraries(gazebo_ros_motor_model)
   install(TARGETS

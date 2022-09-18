@@ -110,6 +110,14 @@
     <gazebo>
       <plugin name="${robot_namespace}_${suffix}_motor_model"
         filename="libgazebo_ros_motor_model.so">
+        <!-- -->
+        <ros>
+          <namespace>${robot_namespace}</namespace>
+          <remapping>motor_speed:=rotor_${id}/motor_speed</remapping>
+        </ros>
+
+        <!-- -->
+        <publish_speed>true</publish_speed>
       </plugin>
     </gazebo>
 

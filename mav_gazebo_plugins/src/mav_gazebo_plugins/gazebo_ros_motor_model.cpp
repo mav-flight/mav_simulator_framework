@@ -28,6 +28,7 @@
 
 // C headers
 #include <gazebo_ros/node.hpp>
+#include <std_msgs/msg/float32.hpp>
 
 namespace mav_gazebo_plugins {
 /// @brief  Class to hold private date members (PIMPL patter)
@@ -42,6 +43,12 @@ class GazeboRosMotorModelPrivate {
 
   /// Pointer to ROS node for communication.
   gazebo_ros::Node::SharedPtr ros_node_;
+
+  /// Motor speed publisher.
+  rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr motor_speed_pub_;
+
+  /// Whether to publish motor speed messages.
+  bool publish_speed_;
 };  // class GazeboRosMotorModelPrivate
 
 ///
@@ -61,6 +68,20 @@ void GazeboRosMotorModel::Load(gazebo::physics::ModelPtr _model,
 
   // Initialize GazeboROS node from SDF parameters
   impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
+
+  // Get QoS profiles
+  const gazebo_ros::QoS & qos = impl_->ros_node_->get_qos();
+
+  // Advertise the motor's speed
+  impl_->publish_speed_ = _sdf->Get<bool>("publish_speed", true).first;
+  if (impl_->publish_speed_) {
+    impl_->motor_speed_pub_ = (
+      impl_->ros_node_->create_publisher<std_msgs::msg::Float32>("motor_speed",
+        qos.get_publisher_qos("motor_speed", rclcpp::QoS(1))));
+
+    RCLCPP_INFO(impl_->ros_node_->get_logger(), "Advertise motor speed on [%s]",
+                impl_->motor_speed_pub_->get_topic_name());
+  }
 }
 
 ///

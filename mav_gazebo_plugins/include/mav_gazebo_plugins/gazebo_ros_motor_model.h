@@ -40,6 +40,12 @@ class GazeboRosMotorModelPrivate;
 ///   @code{.xml}
 ///     <gazebo>
 ///       <plugin name="gazebo_ros_motor_model" filename="libgazebo_ros_motor_model.so">
+///         <ros>
+///           <namespace>demo</namespace>
+///           <remapping>motor_speed:=motor_speed_demo</remapping>
+///         </ros>
+///
+///         <publish_speed>true</publish_speed>
 ///       </plugin>
 ///     </gazebo>
 ///   @endcode
