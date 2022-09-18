@@ -23,7 +23,7 @@
  *  @author     Janosch Nikolic, ASL, ETH Zurich
  *  @author     Markus Achtelik, ASL, ETH Zurich
  *  @author     Suresh G
- *  @date       17.09.2022
+ *  @date       @showdate "%B %d, %Y" 2022-9-17
  */
 #pragma once
 
@@ -32,8 +32,10 @@
 
 namespace mav_gazebo_plugins {
 // Forward declaration of private data class.
+/// @class  GazeboRosMotorModelPrivate
 class GazeboRosMotorModelPrivate;
 
+/// @class  GazeboRosMotorModel
 /// @brief  Class for custom gazebo rotor's motor model.
 /// @details  Attach plugin to a gazebo MAV rotor's and publish ROS message
 ///           output.

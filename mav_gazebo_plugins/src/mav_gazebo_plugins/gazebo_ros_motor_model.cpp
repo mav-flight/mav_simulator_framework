@@ -23,7 +23,7 @@
  *  @author     Janosch Nikolic, ASL, ETH Zurich
  *  @author     Markus Achtelik, ASL, ETH Zurich
  *  @author     Suresh G
- *  @date       17.09.2022
+ *  @date       @showdate "%B %d, %Y" 2022-9-17
  */
 #include "mav_gazebo_plugins/gazebo_ros_motor_model.h"
 
