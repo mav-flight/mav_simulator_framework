@@ -1,3 +1,16 @@
+// Copyright 2022 Suresh G
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 /*!
  *  @file       gazebo_ros_motor_model.h
  *  @brief      A custom gazebo plugin for MAV motor's common functionalities
@@ -11,18 +24,6 @@
  *  @author     Markus Achtelik, ASL, ETH Zurich
  *  @author     Suresh G
  *  @date       17.09.2022
- *  @copyright  Copyright 2022 Suresh G
- *              Licensed under the Apache License, Version 2.0 (the "License");
- *              you may not use this file except in compliance with the License.
- *              You may obtain a copy of the License at
- *
- *                  http://www.apache.org/licenses/LICENSE-2.0
- *
- *              Unless required by applicable law or agreed to in writing, software
- *              distributed under the License is distributed on an "AS IS" BASIS,
- *              WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *              See the License for the specific language governing permissions and
- *              limitations under the License.
  */
 #pragma once
 
@@ -72,10 +73,6 @@ class GazeboRosMotorModel : public gazebo::ModelPlugin {
   /// @param[in]  _model  Pointer to parent model.
   /// @param[in]  _sdf  SDF element containing user-defined parameters.
   void Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _sdf) override;
-
-  /// @brief  Update callback
-  /// @details  Callback to be called at every simulation iteration.
-  virtual void OnUpdate();
 
  private:
       ////////////////////////////////////////
