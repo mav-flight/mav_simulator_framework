@@ -28,11 +28,16 @@
 #include "mav_gazebo_plugins/gazebo_ros_motor_model.h"
 
 // C headers
+#include <gazebo/common/Events.hh>
+#include <gazebo/common/Time.hh>
 #include <gazebo/physics/Joint.hh>
 #include <gazebo/physics/Link.hh>
 #include <gazebo/physics/Model.hh>
 #include <gazebo/physics/physics.hh>
 #include <gazebo_ros/node.hpp>
+#ifdef IGN_PROFILER_ENABLE
+  #include <ignition/common/Profiler.hh>
+#endif
 #include <std_msgs/msg/float32.hpp>
 
 namespace mav_gazebo_plugins {
@@ -58,6 +63,9 @@ class GazeboRosMotorModelPrivate {
   /// Pointer to ROS node for communication.
   gazebo_ros::Node::SharedPtr ros_node_;
 
+  /// Connection to event called at every world iteration,
+  gazebo::event::ConnectionPtr update_connection_;
+
   /// Pointer to gazebo joint.
   gazebo::physics::JointPtr joint_;
 
@@ -67,8 +75,20 @@ class GazeboRosMotorModelPrivate {
   /// Motor speed publisher.
   rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr motor_speed_pub_;
 
+  /// Protect variables accessed on callbacks.
+  std::mutex lock_;
+
   /// Whether to publish motor speed messages.
   bool publish_speed_;
+
+  /// Update period in seconds.
+  double update_period_;
+
+  /// Seconds since last update.
+  double sampling_time_;
+
+  /// Last update time.
+  gazebo::common::Time last_update_time_;
 };  // class GazeboRosMotorModelPrivate
 
 ///
@@ -126,6 +146,13 @@ void GazeboRosMotorModel::Load(gazebo::physics::ModelPtr _model,
     }
   }
 
+  // Get update rate
+  auto update_rate = _sdf->Get<double>("update_rate", 0.0).first;
+  if (update_rate > 0.0) {
+    impl_->update_period_ = 1.0/update_rate;
+  }
+  impl_->last_update_time_ = impl_->model_->GetWorld()->SimTime();
+
   // Advertise the motor's speed
   impl_->publish_speed_ = _sdf->Get<bool>("publish_speed", true).first;
   if (impl_->publish_speed_) {
@@ -136,11 +163,51 @@ void GazeboRosMotorModel::Load(gazebo::physics::ModelPtr _model,
     RCLCPP_INFO(impl_->ros_node_->get_logger(), "Advertise motor speed on [%s]",
                 impl_->motor_speed_pub_->get_topic_name());
   }
+
+  // Listen to the update event (broadcast every simulation iteration)
+  impl_->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
+    std::bind(&GazeboRosMotorModelPrivate::OnUpdate, impl_.get(),
+              std::placeholders::_1));
 }
 
 ///
 void GazeboRosMotorModelPrivate::OnUpdate(
     const gazebo::common::UpdateInfo& _info) {
+  #ifdef IGN_PROFILER_ENABLE
+    IGN_PROFILE("GazeboRosMotorModelPrivate::OnUpdate");
+  #endif
+  std::lock_guard<std::mutex> lock(lock_);
+
+  #ifdef IGN_PROFILER_ENABLE
+    IGN_PROFILE_BEGIN("fill ROS message");
+  #endif
+  gazebo::common::Time current_time = _info.simTime;
+  sampling_time_ = (current_time - last_update_time_).Double();
+
+  if (sampling_time_ < update_period_) {
+    return;
+  }
+  #ifdef IGN_PROFILER_ENABLE
+    IGN_PROFILE_END();
+  #endif
+
+  if (publish_speed_) {
+    #ifdef IGN_PROFILER_ENABLE
+      IGN_PROFILE_BEGIN("publish motor_speed");
+    #endif
+    motor_speed_pub_->publish(joint_->GetVelocity(0));
+    #ifdef IGN_PROFILER_ENABLE
+      IGN_PROFILE_END();
+    #endif
+  }
+
+  #ifdef IGN_PROFILER_ENABLE
+    IGN_PROFILE_BEGIN("update");
+  #endif
+  last_update_time_ = current_time;
+  #ifdef IGN_PROFILER_ENABLE
+    IGN_PROFILE_END();
+  #endif
 }
 
 // Register this plugin with the simulator

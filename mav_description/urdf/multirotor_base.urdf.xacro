@@ -116,6 +116,9 @@
           <remapping>motor_speed:=rotor_${id}/motor_speed</remapping>
         </ros>
 
+        <joint_name>${robot_namespace}/rotor_${id}_joint</joint_name>
+        <link_name>${robot_namespace}/rotor_${id}</link_name>
+
         <!-- -->
         <publish_speed>true</publish_speed>
       </plugin>
