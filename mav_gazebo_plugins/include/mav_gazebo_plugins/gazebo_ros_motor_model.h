@@ -31,6 +31,13 @@
 #include <gazebo/common/Plugin.hh>
 
 namespace mav_gazebo_plugins {
+/// @enum MotorControlType
+/// @brief  Enum to hold types of motor control
+/// @details
+enum class MotorControlType {
+  kRotationSpeed = 0,
+};
+
 // Forward declaration of private data class.
 /// @class  GazeboRosMotorModelPrivate
 class GazeboRosMotorModelPrivate;
@@ -47,6 +54,11 @@ class GazeboRosMotorModelPrivate;
 ///           <namespace>demo</namespace>
 ///           <remapping>motor_speed:=motor_speed_demo</remapping>
 ///         </ros>
+///
+///         <joint_name>demo_joint</joint_name>
+///         <link_name>demo_link/link_name>
+///         <rotation_direction>ccw</rotation_direction>
+///         <control_type>rotational_speed</control_type>
 ///
 ///         <publish_speed>true</publish_speed>
 ///       </plugin>

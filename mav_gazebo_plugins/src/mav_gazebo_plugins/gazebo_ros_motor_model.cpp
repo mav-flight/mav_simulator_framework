@@ -63,7 +63,7 @@ class GazeboRosMotorModelPrivate {
   /// Pointer to ROS node for communication.
   gazebo_ros::Node::SharedPtr ros_node_;
 
-  /// Connection to event called at every world iteration,
+  /// Connection to event called at every world iteration.
   gazebo::event::ConnectionPtr update_connection_;
 
   /// Pointer to gazebo joint.
@@ -72,11 +72,18 @@ class GazeboRosMotorModelPrivate {
   /// Pointer to gazebo link.
   gazebo::physics::LinkPtr link_;
 
+  /// Motor rotation direction.
+  /// 'Counter-Clockwise' rotation means +1 and 'Clockwise' rotation means -1.
+  int rotation_sign_;
+
+  /// Motor control type.
+  MotorControlType ctrl_type_;
+
   /// Motor speed publisher.
   rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr motor_speed_pub_;
 
   /// Motor rotating speed.
-  std_msgs::msg::Float32 speed_;
+  std_msgs::msg::Float32 speed_msg_;
 
   /// Protect variables accessed on callbacks.
   std::mutex lock_;
@@ -149,6 +156,46 @@ void GazeboRosMotorModel::Load(gazebo::physics::ModelPtr _model,
     }
   }
 
+  // Get rotation direction
+  if (!_sdf->HasElement("rotation_direction")) {
+    RCLCPP_ERROR(impl_->ros_node_->get_logger(),
+      "motor_model plugin missimg <rotation_direction>, cannot proceed");
+    impl_->ros_node_.reset();
+    return;
+  } else {
+    auto rotation_direction = _sdf->Get<std::string>("rotation_direction");
+    // +1 for "ccw", -1 for "cw" and 0 otherwise
+    impl_->rotation_sign_ = (("ccw" == rotation_direction) -
+                            ("cw" == rotation_direction));
+    if (!impl_->rotation_sign_) {
+      RCLCPP_ERROR(impl_->ros_node_->get_logger(),
+        "Rotation direction [%s] is not valid. Allowed values [ccw, cw]",
+        rotation_direction.c_str());
+      impl_->ros_node_.reset();
+      return;
+    }
+  }
+
+  // Get motor type
+  if (!_sdf->HasElement("control_type")) {
+    RCLCPP_INFO(impl_->ros_node_->get_logger(),
+                "motor_model plugin missing <control_type>, cannot proceed");
+    impl_->ros_node_.reset();
+    return;
+  } else {
+    auto control_type = _sdf->Get<std::string>("control_type");
+    if ("rotation_speed" == control_type) {
+      impl_->ctrl_type_ = MotorControlType::kRotationSpeed;
+    } else {
+      RCLCPP_ERROR(impl_->ros_node_->get_logger(),
+        "Motor control type [%s] is not valid. "
+        "Allowed values [rotation_speed]",
+        control_type.c_str());
+      impl_->ros_node_.reset();
+      return;
+    }
+  }
+
   // Get update rate
   auto update_rate = _sdf->Get<double>("update_rate", 0.0).first;
   if (update_rate > 0.0) {
@@ -198,8 +245,8 @@ void GazeboRosMotorModelPrivate::OnUpdate(
     #ifdef IGN_PROFILER_ENABLE
       IGN_PROFILE_BEGIN("publish motor_speed");
     #endif
-    speed_.data = joint_->GetVelocity(0);
-    motor_speed_pub_->publish(speed_);
+    speed_msg_.data = joint_->GetVelocity(0);
+    motor_speed_pub_->publish(speed_msg_);
     #ifdef IGN_PROFILER_ENABLE
       IGN_PROFILE_END();
     #endif
