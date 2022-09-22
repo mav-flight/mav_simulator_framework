@@ -1,4 +1,4 @@
-# mav_simulator_framework
+# mav_simulator_framework [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7105327.svg)](https://doi.org/10.5281/zenodo.7105327)
 The code repository is a fork of "[ethz-asl/rotors_simulator](https://github.com/ethz-asl/rotors_simulator) - RotorS is a UAV gazebo simulator"
 
 ## Installations
