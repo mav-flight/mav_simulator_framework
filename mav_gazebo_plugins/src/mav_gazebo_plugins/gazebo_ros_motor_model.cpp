@@ -67,9 +67,14 @@ class GazeboRosMotorModelPrivate {
       //////////////////////////////////////
 
   /// @brief  Update callback
-  /// @details  Callback to be called at every simulation iteration.
+  /// @details  Callback for every simulation iteration.
   /// @param[in]  _info Updated simulation info.
   void OnUpdate(const gazebo::common::UpdateInfo& _info);
+
+  /// @brief  Control input callback
+  /// @details  Callback for every motor control input.
+  /// @param[in]  _msg Control command message.
+  void OnControlInput(std_msgs::msg::Float32::SharedPtr _msg);
 
       ////////////////////////////////////////
       ////////////  Class Members  ///////////
@@ -99,6 +104,9 @@ class GazeboRosMotorModelPrivate {
 
   /// Motor control input
   double ref_ctrl_input_;
+
+  /// Motor control input subscriber.
+  rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr ctrl_input_sub_;
 
   /// Motor angular velocity publisher.
   rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr angular_velocity_pub_;
@@ -229,6 +237,25 @@ void GazeboRosMotorModel::Load(gazebo::physics::ModelPtr _model,
   }
   impl_->last_update_time_ = impl_->model_->GetWorld()->SimTime();
 
+  // Subcribe the motor's control input
+  switch (impl_->ctrl_type_) {
+    case MotorControlType::kAngularSpeed: {
+      impl_->ctrl_input_sub_ = (
+          impl_->ros_node_->create_subscription<std_msgs::msg::Float32>(
+              "control_input",
+              qos.get_subscription_qos("control_input", rclcpp::QoS(1)),
+              std::bind(&GazeboRosMotorModelPrivate::OnControlInput,
+                        impl_.get(), std::placeholders::_1)));
+      break;
+    }
+    default: {
+      RCLCPP_ERROR(impl_->ros_node_->get_logger(),
+                   "Motor control input subscription is not valid.");
+      impl_->ros_node_.reset();
+      return;
+    }
+  }
+
   // Advertise the motor's angular velocity
   impl_->publish_velocity_ = _sdf->Get<bool>("publish_velocity", true).first;
   if (impl_->publish_velocity_) {
@@ -353,14 +380,13 @@ void GazeboRosMotorModelPrivate::OnUpdate(
   IGN_PROFILE_END();
   IGN_PROFILE_BEGIN("update joint velocity");
 #endif
-  // // // Apply the first order filter on the motor's speed.
-  // // double rotation_speed = angular_speed_filter_->UpdateFilter(
-  // //     /*input_state*/ref_ctrl_input_, /*sampling_time*/sampling_time_);
-  // double angular_speed = 453;
-  //
-  // // Set: simulation time scale motor's angular velocity
-  // joint_->SetVelocity(/*axis*/0,
-  //     /*velocity*/rotation_sign_ * angular_speed / kDefaultSimSlowdown);
+  // Apply the first order filter on the motor's speed.
+  double new_angular_speed = angular_speed_filter_->UpdateFilter(
+      /*input_state*/ref_ctrl_input_, /*sampling_time*/sampling_time_);
+
+  // Set: simulation time scale motor's angular velocity
+  joint_->SetVelocity(/*axis*/0,
+      /*velocity*/rotation_sign_ * new_angular_speed / kDefaultSimSlowdown);
 #ifdef IGN_PROFILER_ENABLE
   IGN_PROFILE_END();
 #endif
@@ -376,6 +402,24 @@ void GazeboRosMotorModelPrivate::OnUpdate(
 #endif
   }
   last_update_time_ = current_time;
+}
+
+///
+void GazeboRosMotorModelPrivate::OnControlInput(
+    std_msgs::msg::Float32::SharedPtr _msg) {
+  std::lock_guard<std::mutex> lock(lock_);
+
+  switch (ctrl_type_) {
+    case MotorControlType::kAngularSpeed: {
+      ref_ctrl_input_ = std::min(static_cast<double>(_msg->data),
+                                 kDefaultMaxAngularSpeed);
+      break;
+    }
+    default: {
+      RCLCPP_ERROR(ros_node_->get_logger(),
+                   "Motor control input is not valid.");
+    }
+  }
 }
 
 // Register this plugin with the simulator

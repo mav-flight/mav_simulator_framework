@@ -72,6 +72,9 @@ static constexpr double kDefaultRotorDragCoefficient = 1.0e-4;
 /// Rolling moment's constant for motor
 static constexpr double kDefaultRollingMomentCoefficient = 1.0e-6;
 
+/// Maximum allowed angular speed control input
+static constexpr double kDefaultMaxAngularSpeed = 838.0;
+
 // Forward declaration of private data class.
 /// @class  GazeboRosMotorModelPrivate
 class GazeboRosMotorModelPrivate;
@@ -88,6 +91,7 @@ class GazeboRosMotorModelPrivate;
 ///         <ros>
 ///           <namespace>demo</namespace>
 ///           <remapping>angular_velocity:=angular_velocity_demo</remapping>
+///           <remapping>control_input:=control_input_demo</remapping>
 ///         </ros>
 ///
 ///         <joint_name>demo_joint</joint_name>
