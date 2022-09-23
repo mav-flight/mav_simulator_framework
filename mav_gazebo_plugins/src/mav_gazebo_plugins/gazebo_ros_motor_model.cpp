@@ -106,6 +106,9 @@ class GazeboRosMotorModelPrivate {
   /// First order filter for angular speed.
   std::unique_ptr<FirstOrderFilter<double>> angular_speed_filter_;
 
+  /// Wind speed in world frame
+  ignition::math::Vector3d wind_speed_W_;
+
   /// Motor angular velocity.
   std_msgs::msg::Float32 velocity_msg_;
 
@@ -241,14 +244,14 @@ void GazeboRosMotorModel::Load(gazebo::physics::ModelPtr _model,
 
   // Listen to the update event (broadcast every simulation iteration)
   impl_->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
-    std::bind(&GazeboRosMotorModelPrivate::OnUpdate, impl_.get(),
-              std::placeholders::_1));
+      std::bind(&GazeboRosMotorModelPrivate::OnUpdate, impl_.get(),
+                std::placeholders::_1));
 
   // Create the first order filter.
   impl_->angular_speed_filter_.reset(new FirstOrderFilter<double>(
-    /*time_const_up=*/kDefaultTimeConstantUp,
-    /*time_const_down=*/kDefaultTimeConstantDown,
-    /*initial_state=*/impl_->ref_ctrl_input_));
+      /*time_const_up*/kDefaultTimeConstantUp,
+      /*time_const_down*/kDefaultTimeConstantDown,
+      /*initial_state*/impl_->ref_ctrl_input_));
 }
 
 ///
@@ -256,6 +259,7 @@ GazeboRosMotorModelPrivate::GazeboRosMotorModelPrivate()
     : rotation_sign_(0),
       ctrl_type_(MotorControlType::kAngularSpeed),
       ref_ctrl_input_(0.0),
+      wind_speed_W_(0.0, 0.0, 0.0),
       publish_velocity_(false),
       update_period_(0.0),
       sampling_time_(0.0) {
@@ -286,16 +290,77 @@ void GazeboRosMotorModelPrivate::OnUpdate(
   IGN_PROFILE_END();
 #endif
 
+  // Get: simulation time scaled motor's angular velocity
+  double angular_velocity = joint_->GetVelocity(0) * kDefaultSimSlowdown;
+  double angular_speed = std::abs(angular_velocity);
+  int angular_velocity_sign = sgn(angular_velocity);
+
 #ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_BEGIN("apply thrust");
+#endif
+  // Compute thrust = k_h * \omega**2
+  // we assume symmetric propellers here
+  double thrust = (rotation_sign_ * angular_velocity_sign *
+                   kDefaultThrustConstant * std::pow(angular_speed, 2));
+
+  // Apply force to the link relative to the body frame
+  link_->AddRelativeForce(ignition::math::Vector3d(0.0, 0.0, thrust));
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+  IGN_PROFILE_BEGIN("apply rotor drag");
+#endif
+  // The True Role of Accelerometer Feedback in Quadrotor Control
+  // by Philippe Martin and Erwan Salaün
+  // Compute forces H-force/rotor_drag = -1.0 * \omega * \lambda_1 * V_A^{\perp}
+  ignition::math::Vector3d joint_axis = joint_->GlobalAxis(0);
+  ignition::math::Vector3d body_velocity_W = (
+      link_->WorldLinearVel() - wind_speed_W_);
+  ignition::math::Vector3d body_velocity_W_perp = (
+      body_velocity_W - (body_velocity_W.Dot(joint_axis) * joint_axis));
+  ignition::math::Vector3d rotor_drag_W = (-1.0 * angular_speed *
+      kDefaultRotorDragCoefficient * body_velocity_W_perp);
+
+  // Apply drag to the link
+  link_->AddForce(rotor_drag_W);
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+  IGN_PROFILE_BEGIN("apply drag torque");
+#endif
+  gazebo::physics::LinkPtr parent_link = link_->GetParentJointsLinks().at(0);
+  // Transformation from parent_link to the link_;
+  ignition::math::Pose3d pose_diff = (link_->WorldCoGPose() -
+                                      parent_link->WorldCoGPose());
+  double torque = -1.0 * kDefaultMomentConstant * rotation_sign_ * thrust;
+  // Transform the drag torque into the parent's frame
+  ignition::math::Vector3d drag_torque_parent = (
+      pose_diff.Rot().RotateVector(ignition::math::Vector3d(0.0, 0.0, torque)));
+
+  // Apply torque to the link relative to the parent's body frame
+  link_->AddRelativeTorque(drag_torque_parent);
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+  IGN_PROFILE_BEGIN("apply rolling moment");
+#endif
+  // The True Role of Accelerometer Feedback in Quadrotor Control
+  // by Philippe Martin and Erwan Salaün
+  // Compute forces H-force/rotor_drag = -1.0 * \omega * \mu_1 * V_A^{\perp}
+  ignition::math::Vector3d rolling_moment_W = (-1.0 * angular_speed *
+      kDefaultRollingMomentCoefficient * body_velocity_W_perp);
+
+  // Apply moment to the parent's link
+  parent_link->AddTorque(rolling_moment_W);
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
   IGN_PROFILE_BEGIN("update joint velocity");
 #endif
-
-  // // Apply the first order filter on the motor's speed.
-  // double rotation_speed = angular_speed_filter_->UpdateFilter(
-  //     /*input_state=*/ref_ctrl_input_, /*sampling_time=*/sampling_time_);
-
-  joint_->SetVelocity(/*axis*/0, /*velocity*/10);
-  last_update_time_ = current_time;
+  // // // Apply the first order filter on the motor's speed.
+  // // double rotation_speed = angular_speed_filter_->UpdateFilter(
+  // //     /*input_state*/ref_ctrl_input_, /*sampling_time*/sampling_time_);
+  // double angular_speed = 453;
+  //
+  // // Set: simulation time scale motor's angular velocity
+  // joint_->SetVelocity(/*axis*/0,
+  //     /*velocity*/rotation_sign_ * angular_speed / kDefaultSimSlowdown);
 #ifdef IGN_PROFILER_ENABLE
   IGN_PROFILE_END();
 #endif
@@ -310,6 +375,7 @@ void GazeboRosMotorModelPrivate::OnUpdate(
     IGN_PROFILE_END();
 #endif
   }
+  last_update_time_ = current_time;
 }
 
 // Register this plugin with the simulator

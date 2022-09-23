@@ -57,6 +57,21 @@ static constexpr double kDefaultTimeConstantUp = 1.0 / 80.0;
 /// Time constant used when decelerating
 static constexpr double kDefaultTimeConstantDown = 1.0 / 40.0;
 
+/// Time constant used to slowdown simulator
+static constexpr double kDefaultSimSlowdown = 10.0;
+
+/// Thrust's constant for motor
+static constexpr double kDefaultThrustConstant = 8.54858e-06;
+
+/// Torque's constant for motor
+static constexpr double kDefaultMomentConstant = 0.016;
+
+/// Rotor drag's constant for motor
+static constexpr double kDefaultRotorDragCoefficient = 1.0e-4;
+
+/// Rolling moment's constant for motor
+static constexpr double kDefaultRollingMomentCoefficient = 1.0e-6;
+
 // Forward declaration of private data class.
 /// @class  GazeboRosMotorModelPrivate
 class GazeboRosMotorModelPrivate;
