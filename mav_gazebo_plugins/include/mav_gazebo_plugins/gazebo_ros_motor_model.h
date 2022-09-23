@@ -22,12 +22,16 @@
  *  @author     Mina Kamel, ASL, ETH Zurich
  *  @author     Janosch Nikolic, ASL, ETH Zurich
  *  @author     Markus Achtelik, ASL, ETH Zurich
+ *  @author     Geoffrey Hunter
  *  @author     Suresh G
  *  @date       @showdate "%B %d, %Y" 2022-9-17
  */
 #pragma once
 
-// C headers
+// C++ headers
+#include <memory>
+
+// Gazebo headers
 #include <gazebo/common/Plugin.hh>
 
 namespace mav_gazebo_plugins {
@@ -35,8 +39,17 @@ namespace mav_gazebo_plugins {
 /// @brief  Enum to hold types of motor control
 /// @details
 enum class MotorControlType {
-  kRotationSpeed = 0,
+  kAngularSpeed = 0,
 };
+
+/// @brief  Return the signum (-1, 0, 1) of the input value.
+/// @param[in]  val The input value.
+/// @return The sign of the input value.
+/// @tparam T Any C/C++ data type.
+template <typename T>
+inline int sgn(T val) {
+  return (T(0) < val) - (val < T(0));
+}
 
 /// Time constant used when accelerating
 static constexpr double kDefaultTimeConstantUp = 1.0 / 80.0;
@@ -55,18 +68,19 @@ class GazeboRosMotorModelPrivate;
 /// @note Example usage:
 ///   @code{.xml}
 ///     <gazebo>
-///       <plugin name="gazebo_ros_motor_model" filename="libgazebo_ros_motor_model.so">
+///       <plugin name="gazebo_ros_motor_model"
+///           filename="libgazebo_ros_motor_model.so">
 ///         <ros>
 ///           <namespace>demo</namespace>
-///           <remapping>motor_speed:=motor_speed_demo</remapping>
+///           <remapping>angular_velocity:=angular_velocity_demo</remapping>
 ///         </ros>
 ///
 ///         <joint_name>demo_joint</joint_name>
 ///         <link_name>demo_link/link_name>
 ///         <rotation_direction>ccw</rotation_direction>
-///         <control_type>rotational_speed</control_type>
+///         <control_type>angular_speed</control_type>
 ///
-///         <publish_speed>true</publish_speed>
+///         <publish_velocity>true</publish_velocity>
 ///       </plugin>
 ///     </gazebo>
 ///   @endcode

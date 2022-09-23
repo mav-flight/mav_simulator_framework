@@ -22,12 +22,13 @@
  *  @author     Mina Kamel, ASL, ETH Zurich
  *  @author     Janosch Nikolic, ASL, ETH Zurich
  *  @author     Markus Achtelik, ASL, ETH Zurich
+ *  @author     Geoffrey Hunter
  *  @author     Suresh G
  *  @date       @showdate "%B %d, %Y" 2022-9-17
  */
 #include "mav_gazebo_plugins/gazebo_ros_motor_model.h"
 
-// C headers
+// Gazebo headers
 #include <gazebo/common/Events.hh>
 #include <gazebo/common/Time.hh>
 #include <gazebo/physics/Joint.hh>
@@ -35,13 +36,17 @@
 #include <gazebo/physics/Model.hh>
 #include <gazebo/physics/physics.hh>
 #include <gazebo_ros/node.hpp>
-#ifdef IGN_PROFILER_ENABLE
-  #include <ignition/common/Profiler.hh>
-#endif
+
+// ROS headers
 #include <std_msgs/msg/float32.hpp>
 
-// Custom headers
+// Mav-Gazebo headers
 #include "mav_gazebo_plugins/gazebo_ros_common.h"
+
+// Conditional headers
+#ifdef IGN_PROFILER_ENABLE
+#include <ignition/common/Profiler.hh>
+#endif
 
 namespace mav_gazebo_plugins {
 /// @brief  Class to hold private date members (PIMPL patter)
@@ -51,11 +56,11 @@ class GazeboRosMotorModelPrivate {
       //////////// Constructors & Destructors ///////////
       ///////////////////////////////////////////////////
 
-   /// @brief  Default Constructor
-   GazeboRosMotorModelPrivate();
+  /// @brief  Default Constructor
+  GazeboRosMotorModelPrivate();
 
-   /// @brief  Destructor
-   ~GazeboRosMotorModelPrivate();
+  /// @brief  Destructor
+  ~GazeboRosMotorModelPrivate();
 
       //////////////////////////////////////
       //////////// Class Methods ///////////
@@ -95,20 +100,20 @@ class GazeboRosMotorModelPrivate {
   /// Motor control input
   double ref_ctrl_input_;
 
-  /// Motor speed publisher.
-  rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr motor_speed_pub_;
+  /// Motor angular velocity publisher.
+  rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr angular_velocity_pub_;
 
-  /// First order filter for rotor speed.
-  std::unique_ptr<FirstOrderFilter<double>> rotor_speed_filter_;
+  /// First order filter for angular speed.
+  std::unique_ptr<FirstOrderFilter<double>> angular_speed_filter_;
 
-  /// Motor rotating speed.
-  std_msgs::msg::Float32 speed_msg_;
+  /// Motor angular velocity.
+  std_msgs::msg::Float32 velocity_msg_;
 
   /// Protect variables accessed on callbacks.
   std::mutex lock_;
 
-  /// Whether to publish motor speed messages.
-  bool publish_speed_;
+  /// Whether to publish motor angular velocity messages.
+  bool publish_velocity_;
 
   /// Update period in seconds.
   double update_period_;
@@ -178,18 +183,18 @@ void GazeboRosMotorModel::Load(gazebo::physics::ModelPtr _model,
   // Get rotation direction
   if (!_sdf->HasElement("rotation_direction")) {
     RCLCPP_ERROR(impl_->ros_node_->get_logger(),
-      "motor_model plugin missimg <rotation_direction>, cannot proceed");
+        "motor_model plugin missimg <rotation_direction>, cannot proceed");
     impl_->ros_node_.reset();
     return;
   } else {
     auto rotation_direction = _sdf->Get<std::string>("rotation_direction");
     // +1 for "ccw", -1 for "cw" and 0 otherwise
     impl_->rotation_sign_ = (("ccw" == rotation_direction) -
-                            ("cw" == rotation_direction));
+                             ("cw" == rotation_direction));
     if (!impl_->rotation_sign_) {
       RCLCPP_ERROR(impl_->ros_node_->get_logger(),
-        "Rotation direction [%s] is not valid. Allowed values [ccw, cw]",
-        rotation_direction.c_str());
+          "Rotation direction [%s] is not valid. Allowed values [ccw, cw]",
+          rotation_direction.c_str());
       impl_->ros_node_.reset();
       return;
     }
@@ -203,13 +208,12 @@ void GazeboRosMotorModel::Load(gazebo::physics::ModelPtr _model,
     return;
   } else {
     auto control_type = _sdf->Get<std::string>("control_type");
-    if ("rotation_speed" == control_type) {
-      impl_->ctrl_type_ = MotorControlType::kRotationSpeed;
+    if ("angular_speed" == control_type) {
+      impl_->ctrl_type_ = MotorControlType::kAngularSpeed;
     } else {
       RCLCPP_ERROR(impl_->ros_node_->get_logger(),
-        "Motor control type [%s] is not valid. "
-        "Allowed values [rotation_speed]",
-        control_type.c_str());
+          "Motor control type [%s] is not valid. "
+          "Allowed values [angular_speed]", control_type.c_str());
       impl_->ros_node_.reset();
       return;
     }
@@ -222,15 +226,17 @@ void GazeboRosMotorModel::Load(gazebo::physics::ModelPtr _model,
   }
   impl_->last_update_time_ = impl_->model_->GetWorld()->SimTime();
 
-  // Advertise the motor's speed
-  impl_->publish_speed_ = _sdf->Get<bool>("publish_speed", true).first;
-  if (impl_->publish_speed_) {
-    impl_->motor_speed_pub_ = (
-      impl_->ros_node_->create_publisher<std_msgs::msg::Float32>("motor_speed",
-        qos.get_publisher_qos("motor_speed", rclcpp::QoS(1))));
+  // Advertise the motor's angular velocity
+  impl_->publish_velocity_ = _sdf->Get<bool>("publish_velocity", true).first;
+  if (impl_->publish_velocity_) {
+    impl_->angular_velocity_pub_ = (
+        impl_->ros_node_->create_publisher<std_msgs::msg::Float32>(
+            "angular_velocity",
+            qos.get_publisher_qos("angular_velocity", rclcpp::QoS(1))));
 
-    RCLCPP_INFO(impl_->ros_node_->get_logger(), "Advertise motor speed on [%s]",
-                impl_->motor_speed_pub_->get_topic_name());
+    RCLCPP_INFO(impl_->ros_node_->get_logger(),
+                "Advertise angular velocity on [%s]",
+                impl_->angular_velocity_pub_->get_topic_name());
   }
 
   // Listen to the update event (broadcast every simulation iteration)
@@ -239,7 +245,7 @@ void GazeboRosMotorModel::Load(gazebo::physics::ModelPtr _model,
               std::placeholders::_1));
 
   // Create the first order filter.
-  impl_->rotor_speed_filter_.reset(new FirstOrderFilter<double>(
+  impl_->angular_speed_filter_.reset(new FirstOrderFilter<double>(
     /*time_const_up=*/kDefaultTimeConstantUp,
     /*time_const_down=*/kDefaultTimeConstantDown,
     /*initial_state=*/impl_->ref_ctrl_input_));
@@ -248,9 +254,9 @@ void GazeboRosMotorModel::Load(gazebo::physics::ModelPtr _model,
 ///
 GazeboRosMotorModelPrivate::GazeboRosMotorModelPrivate()
     : rotation_sign_(0),
-      ctrl_type_(MotorControlType::kRotationSpeed),
+      ctrl_type_(MotorControlType::kAngularSpeed),
       ref_ctrl_input_(0.0),
-      publish_speed_(false),
+      publish_velocity_(false),
       update_period_(0.0),
       sampling_time_(0.0) {
 }
@@ -262,47 +268,48 @@ GazeboRosMotorModelPrivate::~GazeboRosMotorModelPrivate() {
 ///
 void GazeboRosMotorModelPrivate::OnUpdate(
     const gazebo::common::UpdateInfo& _info) {
-  #ifdef IGN_PROFILER_ENABLE
-    IGN_PROFILE("GazeboRosMotorModelPrivate::OnUpdate");
-  #endif
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE("GazeboRosMotorModelPrivate::OnUpdate");
+#endif
   std::lock_guard<std::mutex> lock(lock_);
 
-  #ifdef IGN_PROFILER_ENABLE
-    IGN_PROFILE_BEGIN("fill ROS message");
-  #endif
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_BEGIN("fill ROS message");
+#endif
   gazebo::common::Time current_time = _info.simTime;
   sampling_time_ = (current_time - last_update_time_).Double();
 
   if (sampling_time_ < update_period_) {
     return;
   }
-  #ifdef IGN_PROFILER_ENABLE
-    IGN_PROFILE_END();
-  #endif
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+#endif
 
-  if (publish_speed_) {
-    #ifdef IGN_PROFILER_ENABLE
-      IGN_PROFILE_BEGIN("publish motor_speed");
-    #endif
-    speed_msg_.data = joint_->GetVelocity(0);
-    motor_speed_pub_->publish(speed_msg_);
-    #ifdef IGN_PROFILER_ENABLE
-      IGN_PROFILE_END();
-    #endif
-  }
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_BEGIN("update joint velocity");
+#endif
 
-  #ifdef IGN_PROFILER_ENABLE
-    IGN_PROFILE_BEGIN("update");
-  #endif
+  // // Apply the first order filter on the motor's speed.
+  // double rotation_speed = angular_speed_filter_->UpdateFilter(
+  //     /*input_state=*/ref_ctrl_input_, /*sampling_time=*/sampling_time_);
 
-  // Apply the first order filter on the motor's speed.
-  double rotation_speed = rotor_speed_filter_->UpdateFilter(
-    /*input_state=*/ref_ctrl_input_, /*sampling_time=*/sampling_time_);
-
+  joint_->SetVelocity(/*axis*/0, /*velocity*/10);
   last_update_time_ = current_time;
-  #ifdef IGN_PROFILER_ENABLE
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+#endif
+
+  if (publish_velocity_) {
+#ifdef IGN_PROFILER_ENABLE
+    IGN_PROFILE_BEGIN("publish angular_velocity");
+#endif
+    velocity_msg_.data = joint_->GetVelocity(0);
+    angular_velocity_pub_->publish(velocity_msg_);
+#ifdef IGN_PROFILER_ENABLE
     IGN_PROFILE_END();
-  #endif
+#endif
+  }
 }
 
 // Register this plugin with the simulator

@@ -113,16 +113,16 @@
         <!-- -->
         <ros>
           <namespace>${robot_namespace}</namespace>
-          <remapping>motor_speed:=rotor_${id}/motor_speed</remapping>
+          <remapping>angular_velocity:=rotor_${id}/angular_velocity</remapping>
         </ros>
 
         <joint_name>${robot_namespace}/rotor_${id}_joint</joint_name>
         <link_name>${robot_namespace}/rotor_${id}</link_name>
         <rotation_direction>${direction}</rotation_direction>
-        <control_type>rotation_speed</control_type>
+        <control_type>angular_speed</control_type>
 
         <!-- -->
-        <publish_speed>true</publish_speed>
+        <publish_velocity>true</publish_velocity>
       </plugin>
     </gazebo>
 
