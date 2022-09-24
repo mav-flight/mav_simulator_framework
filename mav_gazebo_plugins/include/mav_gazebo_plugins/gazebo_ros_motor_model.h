@@ -24,6 +24,7 @@
  *  @author     Markus Achtelik, ASL, ETH Zurich
  *  @author     Geoffrey Hunter
  *  @author     Suresh G
+ *  @version    0.0.0
  *  @date       @showdate "%B %d, %Y" 2022-09-17
  *  @copyright  Apache License, Version 2.0
  */
@@ -76,6 +77,9 @@ static constexpr double kDefaultRollingMomentCoefficient = 1.0e-6;
 /// Maximum allowed angular speed control input
 static constexpr double kDefaultMaxAngularSpeed = 838.0;
 
+/// Update rate in hz.
+static constexpr double kDefaultUpdateRate = 100.0;
+
 // Forward declaration of private data class.
 /// @class  GazeboRosMotorModelPrivate
 class GazeboRosMotorModelPrivate;
@@ -101,6 +105,7 @@ class GazeboRosMotorModelPrivate;
 ///         <control_type>angular_speed</control_type>
 ///
 ///         <publish_velocity>true</publish_velocity>
+///         <update_rate>100.0</update_rate>
 ///       </plugin>
 ///     </gazebo>
 ///   @endcode

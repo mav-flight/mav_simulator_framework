@@ -24,6 +24,7 @@
  *  @author     Markus Achtelik, ASL, ETH Zurich
  *  @author     Geoffrey Hunter
  *  @author     Suresh G
+ *  @version    0.0.0
  *  @date       @showdate "%B %d, %Y" 2022-09-17
  *  @copyright  Apache License, Version 2.0
  */
@@ -133,6 +134,30 @@ class GazeboRosMotorModelPrivate {
   /// Seconds since last update.
   double sampling_time_;
 
+  /// Acceleration time constant
+  double time_const_up_;
+
+  /// Deceleration time constant
+  double time_const_down_;
+
+  /// Simulation physics slowdown
+  double sim_slowdown_;
+
+  /// Thrust constant
+  double thrust_const_;
+
+  /// Rotor drag coefficient
+  double rotor_drag_coeff_;
+
+  /// Moment constant
+  double moment_const_;
+
+  /// Rolling moment coefficient
+  double rolling_moment_coeff_;
+
+  /// Maximum allowed angular speed input.
+  double max_angular_speed_;
+
   /// Last update time.
   gazebo::common::Time last_update_time_;
 };  // class GazeboRosMotorModelPrivate
@@ -233,11 +258,29 @@ void GazeboRosMotorModel::Load(gazebo::physics::ModelPtr _model,
   }
 
   // Get update rate
-  auto update_rate = _sdf->Get<double>("update_rate", 0.0).first;
-  if (update_rate > 0.0) {
-    impl_->update_period_ = 1.0 / update_rate;
-  }
+  auto update_rate = _sdf->Get<double>("update_rate", kDefaultUpdateRate).first;
+  impl_->update_period_ = update_rate > 0.0 ? 1.0 / update_rate : 0.0;
   impl_->last_update_time_ = impl_->model_->GetWorld()->SimTime();
+
+  // Get constants
+  impl_->time_const_up_ =
+      _sdf->Get<double>("time_constant_up", kDefaultTimeConstantUp).first;
+  impl_->time_const_down_ =
+      _sdf->Get<double>("time_constant_down", kDefaultTimeConstantDown).first;
+  impl_->sim_slowdown_ =
+      _sdf->Get<double>("sim_slowdown", kDefaultSimSlowdown).first;
+  impl_->thrust_const_ =
+      _sdf->Get<double>("thrust_constant", kDefaultThrustConstant).first;
+  impl_->rotor_drag_coeff_ =
+      _sdf->Get<double>("rotor_drag_coeff", kDefaultRotorDragCoefficient).first;
+  impl_->moment_const_ =
+      _sdf->Get<double>("moment_constant", kDefaultMomentConstant).first;
+  impl_->rolling_moment_coeff_ =
+      _sdf->Get<double>("rolling_moment_coeff",
+                        kDefaultRollingMomentCoefficient)
+          .first;
+  impl_->max_angular_speed_ =
+      _sdf->Get<double>("max_angular_speed", kDefaultMaxAngularSpeed).first;
 
   // Subcribe the motor's control input
   switch (impl_->ctrl_type_) {
@@ -278,20 +321,13 @@ void GazeboRosMotorModel::Load(gazebo::physics::ModelPtr _model,
 
   // Create the first order filter.
   impl_->angular_speed_filter_.reset(new FirstOrderFilter<double>(
-      /*time_const_up*/ kDefaultTimeConstantUp,
-      /*time_const_down*/ kDefaultTimeConstantDown,
+      /*time_const_up*/ impl_->time_const_up_,
+      /*time_const_down*/ impl_->time_const_down_,
       /*initial_state*/ impl_->ref_ctrl_input_));
 }
 
 ///
-GazeboRosMotorModelPrivate::GazeboRosMotorModelPrivate()
-    : rotation_sign_(0),
-      ctrl_type_(MotorControlType::kAngularSpeed),
-      ref_ctrl_input_(0.0),
-      wind_speed_W_(0.0, 0.0, 0.0),
-      publish_velocity_(false),
-      update_period_(0.0),
-      sampling_time_(0.0) {}
+GazeboRosMotorModelPrivate::GazeboRosMotorModelPrivate() {}
 
 ///
 GazeboRosMotorModelPrivate::~GazeboRosMotorModelPrivate() {}
@@ -318,7 +354,7 @@ void GazeboRosMotorModelPrivate::OnUpdate(
 #endif
 
   // Get: simulation time scaled motor's angular velocity
-  double angular_velocity = joint_->GetVelocity(0) * kDefaultSimSlowdown;
+  double angular_velocity = joint_->GetVelocity(0) * sim_slowdown_;
   double angular_speed = std::abs(angular_velocity);
   int angular_velocity_sign = sgn(angular_velocity);
 
@@ -327,8 +363,8 @@ void GazeboRosMotorModelPrivate::OnUpdate(
 #endif
   // Compute thrust = k_h * \omega**2
   // we assume symmetric propellers here
-  double thrust = (rotation_sign_ * angular_velocity_sign *
-                   kDefaultThrustConstant * std::pow(angular_speed, 2));
+  double thrust = (rotation_sign_ * angular_velocity_sign * thrust_const_ *
+                   std::pow(angular_speed, 2));
 
   // Apply force to the link relative to the body frame
   link_->AddRelativeForce(ignition::math::Vector3d(0.0, 0.0, thrust));
@@ -345,8 +381,7 @@ void GazeboRosMotorModelPrivate::OnUpdate(
   ignition::math::Vector3d body_velocity_W_perp =
       (body_velocity_W - (body_velocity_W.Dot(joint_axis) * joint_axis));
   ignition::math::Vector3d rotor_drag_W =
-      (-1.0 * angular_speed * kDefaultRotorDragCoefficient *
-       body_velocity_W_perp);
+      (-1.0 * angular_speed * rotor_drag_coeff_ * body_velocity_W_perp);
 
   // Apply drag to the link
   link_->AddForce(rotor_drag_W);
@@ -358,7 +393,7 @@ void GazeboRosMotorModelPrivate::OnUpdate(
   // Transformation from parent_link to the link_;
   ignition::math::Pose3d pose_diff =
       (link_->WorldCoGPose() - parent_link->WorldCoGPose());
-  double torque = -1.0 * kDefaultMomentConstant * rotation_sign_ * thrust;
+  double torque = -1.0 * moment_const_ * rotation_sign_ * thrust;
   // Transform the drag torque into the parent's frame
   ignition::math::Vector3d drag_torque_parent = (pose_diff.Rot().RotateVector(
       ignition::math::Vector3d(0.0, 0.0, torque)));
@@ -373,8 +408,7 @@ void GazeboRosMotorModelPrivate::OnUpdate(
   // by Philippe Martin and Erwan Salaün
   // Compute forces H-force/rotor_drag = -1.0 * \omega * \mu_1 * V_A^{\perp}
   ignition::math::Vector3d rolling_moment_W =
-      (-1.0 * angular_speed * kDefaultRollingMomentCoefficient *
-       body_velocity_W_perp);
+      (-1.0 * angular_speed * rolling_moment_coeff_ * body_velocity_W_perp);
 
   // Apply moment to the parent's link
   parent_link->AddTorque(rolling_moment_W);
@@ -389,7 +423,7 @@ void GazeboRosMotorModelPrivate::OnUpdate(
   // Set: simulation time scale motor's angular velocity
   joint_->SetVelocity(
       /*axis*/ 0,
-      /*velocity*/ rotation_sign_ * new_angular_speed / kDefaultSimSlowdown);
+      /*velocity*/ rotation_sign_ * new_angular_speed / sim_slowdown_);
 #ifdef IGN_PROFILER_ENABLE
   IGN_PROFILE_END();
 #endif
@@ -415,7 +449,7 @@ void GazeboRosMotorModelPrivate::OnControlInput(
   switch (ctrl_type_) {
     case MotorControlType::kAngularSpeed: {
       ref_ctrl_input_ =
-          std::min(static_cast<double>(_msg->data), kDefaultMaxAngularSpeed);
+          std::min(static_cast<double>(_msg->data), max_angular_speed_);
       break;
     }
     default: {

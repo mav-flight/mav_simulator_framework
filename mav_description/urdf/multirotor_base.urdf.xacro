@@ -124,6 +124,7 @@
 
         <!-- -->
         <publish_velocity>true</publish_velocity>
+        <update_rate>100.0</update_rate>
       </plugin>
     </gazebo>
 
