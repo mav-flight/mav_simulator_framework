@@ -38,30 +38,28 @@ namespace mav_gazebo_plugins {
 ///           where, \f$x(t)\f$ denote a generic output,
 ///           \f$u(t)\f$ denote a generic input and
 ///           \f$\tau\f$ denote a time constant [s].
-/// @note For detail explanation of derivation https://dsp.stackexchange.com/questions/71919/first-order-hold-discrete-time-approximation-to-first-order-continuous-time-line
+/// @note For detail explanation of derivation
+/// https://dsp.stackexchange.com/questions/71919/first-order-hold-discrete-time-approximation-to-first-order-continuous-time-line
 /// @tparam T Any C/C++ data type.
-template<class T>
+template <class T>
 class FirstOrderFilter {
  public:
-      ///////////////////////////////////////////////////
-      //////////// Constructors & Destructors ///////////
-      ///////////////////////////////////////////////////
+  ///////////////////////////////////////////////////
+  //////////// Constructors & Destructors ///////////
+  ///////////////////////////////////////////////////
 
   /// @brief  Constructor
   /// @param[in]  time_const_up
   /// @param[in]  time_const_down
   /// @param[in]  initial_state
-  FirstOrderFilter(double time_const_up,
-                   double time_const_down,
+  FirstOrderFilter(double time_const_up, double time_const_down,
                    T initial_state)
       : time_const_up_(time_const_up),
         time_const_down_(time_const_down),
-        previous_state_(initial_state) {
-  }
+        previous_state_(initial_state) {}
 
   /// @brief  Destructor
-  ~FirstOrderFilter() {
-  }
+  ~FirstOrderFilter() {}
 
   /// @brief  Apply a first order filter on the input state.
   /// @param[in]  input_state
@@ -85,9 +83,9 @@ class FirstOrderFilter {
   }
 
  protected:
-      ////////////////////////////////////////
-      ////////////  Class Members  ///////////
-      ////////////////////////////////////////
+  ////////////////////////////////////////
+  ////////////  Class Members  ///////////
+  ////////////////////////////////////////
 
   /// ODE time constant when accelerating.
   double time_const_up_;

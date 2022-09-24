@@ -49,12 +49,12 @@
 #endif
 
 namespace mav_gazebo_plugins {
-/// @brief  Class to hold private date members (PIMPL patter)
+/// @brief  Class to hold private date members (PIMPL pattern)
 class GazeboRosMotorModelPrivate {
  public:
-      ///////////////////////////////////////////////////
-      //////////// Constructors & Destructors ///////////
-      ///////////////////////////////////////////////////
+  ///////////////////////////////////////////////////
+  //////////// Constructors & Destructors ///////////
+  ///////////////////////////////////////////////////
 
   /// @brief  Default Constructor
   GazeboRosMotorModelPrivate();
@@ -62,9 +62,9 @@ class GazeboRosMotorModelPrivate {
   /// @brief  Destructor
   ~GazeboRosMotorModelPrivate();
 
-      //////////////////////////////////////
-      //////////// Class Methods ///////////
-      //////////////////////////////////////
+  //////////////////////////////////////
+  //////////// Class Methods ///////////
+  //////////////////////////////////////
 
   /// @brief  Update callback
   /// @details  Callback for every simulation iteration.
@@ -74,11 +74,11 @@ class GazeboRosMotorModelPrivate {
   /// @brief  Control input callback
   /// @details  Callback for every motor control input.
   /// @param[in]  _msg Control command message.
-  void OnControlInput(std_msgs::msg::Float32::SharedPtr _msg);
+  void OnControlInput(const std_msgs::msg::Float32::SharedPtr _msg);
 
-      ////////////////////////////////////////
-      ////////////  Class Members  ///////////
-      ////////////////////////////////////////
+  ////////////////////////////////////////
+  ////////////  Class Members  ///////////
+  ////////////////////////////////////////
 
   /// Pointer to parent model.
   gazebo::physics::ModelPtr model_;
@@ -138,12 +138,10 @@ class GazeboRosMotorModelPrivate {
 
 ///
 GazeboRosMotorModel::GazeboRosMotorModel()
-    : impl_(std::make_unique<GazeboRosMotorModelPrivate>()) {
-}
+    : impl_(std::make_unique<GazeboRosMotorModelPrivate>()) {}
 
 ///
-GazeboRosMotorModel::~GazeboRosMotorModel() {
-}
+GazeboRosMotorModel::~GazeboRosMotorModel() {}
 
 ///
 void GazeboRosMotorModel::Load(gazebo::physics::ModelPtr _model,
@@ -155,7 +153,7 @@ void GazeboRosMotorModel::Load(gazebo::physics::ModelPtr _model,
   impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
 
   // Get QoS profiles
-  const gazebo_ros::QoS & qos = impl_->ros_node_->get_qos();
+  const gazebo_ros::QoS& qos = impl_->ros_node_->get_qos();
 
   // Get joint details
   if (!_sdf->HasElement("joint_name")) {
@@ -194,18 +192,20 @@ void GazeboRosMotorModel::Load(gazebo::physics::ModelPtr _model,
   // Get rotation direction
   if (!_sdf->HasElement("rotation_direction")) {
     RCLCPP_ERROR(impl_->ros_node_->get_logger(),
-        "motor_model plugin missimg <rotation_direction>, cannot proceed");
+                 "motor_model plugin missimg <rotation_direction>, "
+                 "cannot proceed");
     impl_->ros_node_.reset();
     return;
   } else {
     auto rotation_direction = _sdf->Get<std::string>("rotation_direction");
     // +1 for "ccw", -1 for "cw" and 0 otherwise
-    impl_->rotation_sign_ = (("ccw" == rotation_direction) -
-                             ("cw" == rotation_direction));
+    impl_->rotation_sign_ =
+        (("ccw" == rotation_direction) - ("cw" == rotation_direction));
     if (!impl_->rotation_sign_) {
       RCLCPP_ERROR(impl_->ros_node_->get_logger(),
-          "Rotation direction [%s] is not valid. Allowed values [ccw, cw]",
-          rotation_direction.c_str());
+                   "Rotation direction [%s] is not valid. "
+                   "Allowed values [ccw, cw]",
+                   rotation_direction.c_str());
       impl_->ros_node_.reset();
       return;
     }
@@ -223,8 +223,9 @@ void GazeboRosMotorModel::Load(gazebo::physics::ModelPtr _model,
       impl_->ctrl_type_ = MotorControlType::kAngularSpeed;
     } else {
       RCLCPP_ERROR(impl_->ros_node_->get_logger(),
-          "Motor control type [%s] is not valid. "
-          "Allowed values [angular_speed]", control_type.c_str());
+                   "Motor control type [%s] is not valid. "
+                   "Allowed values [angular_speed]",
+                   control_type.c_str());
       impl_->ros_node_.reset();
       return;
     }
@@ -240,8 +241,8 @@ void GazeboRosMotorModel::Load(gazebo::physics::ModelPtr _model,
   // Subcribe the motor's control input
   switch (impl_->ctrl_type_) {
     case MotorControlType::kAngularSpeed: {
-      impl_->ctrl_input_sub_ = (
-          impl_->ros_node_->create_subscription<std_msgs::msg::Float32>(
+      impl_->ctrl_input_sub_ =
+          (impl_->ros_node_->create_subscription<std_msgs::msg::Float32>(
               "control_input",
               qos.get_subscription_qos("control_input", rclcpp::QoS(1)),
               std::bind(&GazeboRosMotorModelPrivate::OnControlInput,
@@ -259,8 +260,8 @@ void GazeboRosMotorModel::Load(gazebo::physics::ModelPtr _model,
   // Advertise the motor's angular velocity
   impl_->publish_velocity_ = _sdf->Get<bool>("publish_velocity", true).first;
   if (impl_->publish_velocity_) {
-    impl_->angular_velocity_pub_ = (
-        impl_->ros_node_->create_publisher<std_msgs::msg::Float32>(
+    impl_->angular_velocity_pub_ =
+        (impl_->ros_node_->create_publisher<std_msgs::msg::Float32>(
             "angular_velocity",
             qos.get_publisher_qos("angular_velocity", rclcpp::QoS(1))));
 
@@ -276,9 +277,9 @@ void GazeboRosMotorModel::Load(gazebo::physics::ModelPtr _model,
 
   // Create the first order filter.
   impl_->angular_speed_filter_.reset(new FirstOrderFilter<double>(
-      /*time_const_up*/kDefaultTimeConstantUp,
-      /*time_const_down*/kDefaultTimeConstantDown,
-      /*initial_state*/impl_->ref_ctrl_input_));
+      /*time_const_up*/ kDefaultTimeConstantUp,
+      /*time_const_down*/ kDefaultTimeConstantDown,
+      /*initial_state*/ impl_->ref_ctrl_input_));
 }
 
 ///
@@ -289,12 +290,10 @@ GazeboRosMotorModelPrivate::GazeboRosMotorModelPrivate()
       wind_speed_W_(0.0, 0.0, 0.0),
       publish_velocity_(false),
       update_period_(0.0),
-      sampling_time_(0.0) {
-}
+      sampling_time_(0.0) {}
 
 ///
-GazeboRosMotorModelPrivate::~GazeboRosMotorModelPrivate() {
-}
+GazeboRosMotorModelPrivate::~GazeboRosMotorModelPrivate() {}
 
 ///
 void GazeboRosMotorModelPrivate::OnUpdate(
@@ -340,12 +339,13 @@ void GazeboRosMotorModelPrivate::OnUpdate(
   // by Philippe Martin and Erwan Salaün
   // Compute forces H-force/rotor_drag = -1.0 * \omega * \lambda_1 * V_A^{\perp}
   ignition::math::Vector3d joint_axis = joint_->GlobalAxis(0);
-  ignition::math::Vector3d body_velocity_W = (
-      link_->WorldLinearVel() - wind_speed_W_);
-  ignition::math::Vector3d body_velocity_W_perp = (
-      body_velocity_W - (body_velocity_W.Dot(joint_axis) * joint_axis));
-  ignition::math::Vector3d rotor_drag_W = (-1.0 * angular_speed *
-      kDefaultRotorDragCoefficient * body_velocity_W_perp);
+  ignition::math::Vector3d body_velocity_W =
+      (link_->WorldLinearVel() - wind_speed_W_);
+  ignition::math::Vector3d body_velocity_W_perp =
+      (body_velocity_W - (body_velocity_W.Dot(joint_axis) * joint_axis));
+  ignition::math::Vector3d rotor_drag_W =
+      (-1.0 * angular_speed * kDefaultRotorDragCoefficient *
+       body_velocity_W_perp);
 
   // Apply drag to the link
   link_->AddForce(rotor_drag_W);
@@ -355,12 +355,12 @@ void GazeboRosMotorModelPrivate::OnUpdate(
 #endif
   gazebo::physics::LinkPtr parent_link = link_->GetParentJointsLinks().at(0);
   // Transformation from parent_link to the link_;
-  ignition::math::Pose3d pose_diff = (link_->WorldCoGPose() -
-                                      parent_link->WorldCoGPose());
+  ignition::math::Pose3d pose_diff =
+      (link_->WorldCoGPose() - parent_link->WorldCoGPose());
   double torque = -1.0 * kDefaultMomentConstant * rotation_sign_ * thrust;
   // Transform the drag torque into the parent's frame
-  ignition::math::Vector3d drag_torque_parent = (
-      pose_diff.Rot().RotateVector(ignition::math::Vector3d(0.0, 0.0, torque)));
+  ignition::math::Vector3d drag_torque_parent = (pose_diff.Rot().RotateVector(
+      ignition::math::Vector3d(0.0, 0.0, torque)));
 
   // Apply torque to the link relative to the parent's body frame
   link_->AddRelativeTorque(drag_torque_parent);
@@ -371,8 +371,9 @@ void GazeboRosMotorModelPrivate::OnUpdate(
   // The True Role of Accelerometer Feedback in Quadrotor Control
   // by Philippe Martin and Erwan Salaün
   // Compute forces H-force/rotor_drag = -1.0 * \omega * \mu_1 * V_A^{\perp}
-  ignition::math::Vector3d rolling_moment_W = (-1.0 * angular_speed *
-      kDefaultRollingMomentCoefficient * body_velocity_W_perp);
+  ignition::math::Vector3d rolling_moment_W =
+      (-1.0 * angular_speed * kDefaultRollingMomentCoefficient *
+       body_velocity_W_perp);
 
   // Apply moment to the parent's link
   parent_link->AddTorque(rolling_moment_W);
@@ -382,11 +383,12 @@ void GazeboRosMotorModelPrivate::OnUpdate(
 #endif
   // Apply the first order filter on the motor's speed.
   double new_angular_speed = angular_speed_filter_->UpdateFilter(
-      /*input_state*/ref_ctrl_input_, /*sampling_time*/sampling_time_);
+      /*input_state*/ ref_ctrl_input_, /*sampling_time*/ sampling_time_);
 
   // Set: simulation time scale motor's angular velocity
-  joint_->SetVelocity(/*axis*/0,
-      /*velocity*/rotation_sign_ * new_angular_speed / kDefaultSimSlowdown);
+  joint_->SetVelocity(
+      /*axis*/ 0,
+      /*velocity*/ rotation_sign_ * new_angular_speed / kDefaultSimSlowdown);
 #ifdef IGN_PROFILER_ENABLE
   IGN_PROFILE_END();
 #endif
@@ -406,13 +408,13 @@ void GazeboRosMotorModelPrivate::OnUpdate(
 
 ///
 void GazeboRosMotorModelPrivate::OnControlInput(
-    std_msgs::msg::Float32::SharedPtr _msg) {
+    const std_msgs::msg::Float32::SharedPtr _msg) {
   std::lock_guard<std::mutex> lock(lock_);
 
   switch (ctrl_type_) {
     case MotorControlType::kAngularSpeed: {
-      ref_ctrl_input_ = std::min(static_cast<double>(_msg->data),
-                                 kDefaultMaxAngularSpeed);
+      ref_ctrl_input_ =
+          std::min(static_cast<double>(_msg->data), kDefaultMaxAngularSpeed);
       break;
     }
     default: {
