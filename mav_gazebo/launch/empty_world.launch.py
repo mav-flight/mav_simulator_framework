@@ -1,26 +1,6 @@
 #!/usr/bin/env python3
 """ Launch gazebo server and client with command line arguments. """
 
-##
-# @file empty_world.launch.py
-#
-# @brief Defines a launch description for gazebo server and client.
-#
-# @section description_empty_world_launch Description
-# Generates a custom launch description for gazebo server and client with
-# command line arguments.
-#
-# @section notes_empty_world_launch Notes
-# None
-#
-# @section todo_empty_world_launch TODO
-# None
-#
-# @section author_empty_world_launch Author(s)
-# - Created  by Jose Luis Rivero, Open Source Robotics Foundation, Inc.
-# - Created  by Louise Poubel, Open Source Robotics Foundation, Inc.
-# - Modified by Suresh G
-#
 # Copyright 2022 Suresh G
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,6 +15,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+##
+# @file       empty_world.launch.py
+# @brief      Defines a launch description for gazebo server and client.
+# @details    Generates a custom launch description for gazebo server and client
+#             with command line arguments.
+# @author     Jose Luis Rivero, Open Source Robotics Foundation, Inc.
+# @author     Louise Poubel, Open Source Robotics Foundation, Inc.
+# @author     Suresh G
+# @date       @showdate "%B %d, %Y" 2022-09-18
+# @copyright  Apache License, Version 2.0
+
 # Python Imports
 import os
 from typing import List
@@ -48,7 +39,7 @@ from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions.launch_configuration import LaunchConfiguration
 
-## @cond PRIVATE
+# @cond PRIVATE
 # The launch description's initial arguments
 ARGUMENTS: List[DeclareLaunchArgument] = [
     DeclareLaunchArgument(name="world",
@@ -69,7 +60,8 @@ ARGUMENTS: List[DeclareLaunchArgument] = [
                           description="Whether to start gzserver in a "
                                       "paused state"),
 ]
-## @endcond
+# @endcond
+
 
 def generate_launch_description() -> LaunchDescription:
     """ Generate custom launch description.
@@ -81,7 +73,7 @@ def generate_launch_description() -> LaunchDescription:
     gzserver_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(get_package_share_directory("gazebo_ros"), "launch",
-            "gzserver.launch.py")),
+                         "gzserver.launch.py")),
         launch_arguments={
             "world": LaunchConfiguration("world"),
             "verbose": LaunchConfiguration("verbose"),
@@ -92,7 +84,7 @@ def generate_launch_description() -> LaunchDescription:
     gzclient_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(get_package_share_directory("gazebo_ros"), "launch",
-            "gzclient.launch.py")),
+                         "gzclient.launch.py")),
         condition=IfCondition(LaunchConfiguration("gui")),
         launch_arguments={
             "verbose": LaunchConfiguration("verbose")

@@ -23,7 +23,8 @@
  *  @author     Markus Achtelik, ASL, ETH Zurich
  *  @author     Geoffrey Hunter
  *  @author     Suresh G
- *  @date       @showdate "%B %d, %Y" 2022-9-18
+ *  @date       @showdate "%B %d, %Y" 2022-09-18
+ *  @copyright  Apache License, Version 2.0
  */
 #pragma once
 

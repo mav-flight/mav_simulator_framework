@@ -24,7 +24,8 @@
  *  @author     Markus Achtelik, ASL, ETH Zurich
  *  @author     Geoffrey Hunter
  *  @author     Suresh G
- *  @date       @showdate "%B %d, %Y" 2022-9-17
+ *  @date       @showdate "%B %d, %Y" 2022-09-17
+ *  @copyright  Apache License, Version 2.0
  */
 #include "mav_gazebo_plugins/gazebo_ros_motor_model.h"
 

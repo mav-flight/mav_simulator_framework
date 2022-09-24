@@ -1,28 +1,6 @@
 #!/usr/bin/env python3
 """ Spawn MAV model with command line arguments. """
 
-##
-# @file spawn_mav.launch.py
-#
-# @brief Defines a launch description for spawing MAV.
-#
-# @section description_spawn_mav_launch Description
-# Generates a custom launch description for spawing mav model.
-#
-# @section notes_spawn_mav_launch Notes
-# None
-#
-# @section todo_spawn_mav_launch TODO
-# None
-#
-# @section author_spawn_mav_launch Author(s)
-# - Created  by Fadri Furrer, ASL, ETH Zurich
-# - Created  by Michael Burri, ASL, ETH Zurich
-# - Created  by Mina Kamel, ASL, ETH Zurich
-# - Created  by Janosch Nikolic, ASL, ETH Zurich
-# - Created  by Markus Achtelik, ASL, ETH Zuich
-# - Modified by Surech G
-#
 # Copyright 2022 Suresh G
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,6 +15,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+##
+# @file       spawn_mav.launch.py
+# @brief      Defines a launch description for spawing MAV.
+# @details    Generates a custom launch description for spawing mav model.
+# @author     Fadri Furrer, ASL, ETH Zurich
+# @author     Michael Burri, ASL, ETH Zurich
+# @author     Mina Kamel, ASL, ETH Zurich
+# @author     Janosch Nikolic, ASL, ETH Zurich
+# @author     Markus Achtelik, ASL, ETH Zuich
+# @author     Surech G
+# @date       @showdate "%B %d, %Y" 2022-09-18
+# @copyright  Apache License, Version 2.0
+
 # Python Imports
 import os
 from typing import List
@@ -49,7 +40,7 @@ from launch.actions import DeclareLaunchArgument
 from launch.substitutions import Command
 from launch.substitutions.launch_configuration import LaunchConfiguration
 
-## @cond PRIVATE
+# @cond PRIVATE
 # The launch description's initial arguments
 ARGUMENTS: List[DeclareLaunchArgument] = [
     DeclareLaunchArgument(name="mav_name",
@@ -57,9 +48,9 @@ ARGUMENTS: List[DeclareLaunchArgument] = [
                           description="MAV model name"),
     DeclareLaunchArgument(name="mav_model",
                           default_value=os.path.join(
-                                get_package_share_directory("mav_description"),
-                                "urdf",
-                                "hummingbird.urdf.xacro"),
+                              get_package_share_directory("mav_description"),
+                              "urdf",
+                              "hummingbird.urdf.xacro"),
                           description="Full path of MAV model's xacro file"),
     DeclareLaunchArgument(name="initial_pose_x",
                           default_value="0.0",
@@ -75,7 +66,8 @@ ARGUMENTS: List[DeclareLaunchArgument] = [
                           choices=["true", "false"],
                           description="Whether to use the simulation time"),
 ]
-## @endcond
+# @endcond
+
 
 def generate_launch_description() -> LaunchDescription:
     """ Generate custom launch description.
@@ -91,7 +83,8 @@ def generate_launch_description() -> LaunchDescription:
                     parameters=[
                         {"use_sim_time": LaunchConfiguration("use_sim_time")},
                         {"robot_description": Command([
-                            "xacro", " ", LaunchConfiguration("mav_model"), " ",
+                            "xacro", " ",
+                            LaunchConfiguration("mav_model"), " ",
                             "namespace:=", LaunchConfiguration("mav_name"),
                         ])},
                     ])
@@ -100,16 +93,16 @@ def generate_launch_description() -> LaunchDescription:
     se_node = Node(package="gazebo_ros",
                    executable="spawn_entity.py",
                    arguments=[
-                        "-entity", LaunchConfiguration("mav_name"),
-                        "-topic", "robot_description",
-                        "-timeout", "120",
-                        "-x", LaunchConfiguration("initial_pose_x"),
-                        "-y", LaunchConfiguration("initial_pose_y"),
-                        "-z", LaunchConfiguration("initial_pose_z"),
+                       "-entity", LaunchConfiguration("mav_name"),
+                       "-topic", "robot_description",
+                       "-timeout", "120",
+                       "-x", LaunchConfiguration("initial_pose_x"),
+                       "-y", LaunchConfiguration("initial_pose_y"),
+                       "-z", LaunchConfiguration("initial_pose_z"),
                    ],
                    output="screen",
                    parameters=[
-                    {"use_sim_time": LaunchConfiguration("use_sim_time")}
+                       {"use_sim_time": LaunchConfiguration("use_sim_time")}
                    ])
 
     # Define LaunchDescription variable
