@@ -23,7 +23,7 @@
   <xacro:macro name="box_inertia" params="x y z mass">
     <inertia ixx="${(1.0/12.0) * mass * (y*y + z*z)}" ixy="0.0" ixz="0.0"
              iyy="${(1.0/12.0) * mass * (x*x + z*z)}" iyz="0.0"
-             izz="${(1.0/12.0) * mass * (x*x + y*y)}"/> <!-- [kg m^2] ... -->
+             izz="${(1.0/12.0) * mass * (x*x + y*y)}" /> <!-- [kg m^2] ... -->
   </xacro:macro>
 
   <!--
@@ -31,9 +31,9 @@
   -->
   <xacro:macro name="box_inertial" params="x y z mass *origin">
     <inertial>
-      <mass value="${mass}"/>
-      <xacro:insert_block name="origin"/>
-      <xacro:box_inertia x="${x}" y="${y}" z="${z}" mass="${mass}"/>
+      <mass value="${mass}" />
+      <xacro:insert_block name="origin" />
+      <xacro:box_inertia x="${x}" y="${y}" z="${z}" mass="${mass}" />
     </inertial>
   </xacro:macro>
 
@@ -48,30 +48,30 @@
 
     <link name="${robot_namespace}/base_link_inertia">
       <inertial>
-        <mass value="${mass}"/> <!-- [kg] -->
-        <origin xyz="0 0 0"/>
-        <xacro:insert_block name="inertia"/>
+        <mass value="${mass}" /> <!-- [kg] -->
+        <origin xyz="0 0 0" />
+        <xacro:insert_block name="inertia" />
       </inertial>
 
       <visual>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <origin xyz="0 0 0" rpy="0 0 0" />
         <geometry>
-          <mesh filename="${mesh_file}" scale="1 1 1"/>
+          <mesh filename="${mesh_file}" scale="1 1 1" />
         </geometry>
       </visual>
 
       <collision>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <origin xyz="0 0 0" rpy="0 0 0" />
         <geometry>
-          <box size="${length} ${width} ${height}"/> <!-- [m] [m] [m] -->
+          <box size="${length} ${width} ${height}" /> <!-- [m] [m] [m] -->
         </geometry>
       </collision>
     </link>
 
     <joint name="${robot_namespace}/base_joint" type="fixed">
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <parent link="${robot_namespace}/base_link"/>
-      <child link="${robot_namespace}/base_link_inertia"/>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <parent link="${robot_namespace}/base_link" />
+      <child link="${robot_namespace}/base_link_inertia" />
     </joint>
   </xacro:macro>
 
@@ -82,29 +82,29 @@
     params="robot_namespace suffix direction parent mass radius id color *origin *inertia">
     <link name="${robot_namespace}/rotor_${id}">
       <inertial>
-        <mass value="${mass}"/> <!-- [kg] -->
-        <xacro:insert_block name="inertia"/>
+        <mass value="${mass}" /> <!-- [kg] -->
+        <xacro:insert_block name="inertia" />
       </inertial>
 
       <visual>
         <geometry>
           <mesh filename="file://$(find mav_description)/meshes/propeller_${direction}.dae"
-            scale="${radius} ${radius} ${radius}"/> <!-- [m] [m] [m] -->
+            scale="${radius} ${radius} ${radius}" /> <!-- [m] [m] [m] -->
         </geometry>
       </visual>
 
       <collision>
         <geometry>
-          <cylinder length="0.005" radius="${radius}"/> <!-- [m] -->
+          <cylinder length="0.005" radius="${radius}" /> <!-- [m] -->
         </geometry>
       </collision>
     </link>
 
     <joint name="${robot_namespace}/rotor_${id}_joint" type="continuous">
-      <xacro:insert_block name="origin"/>
-      <axis xyz="0 0 1"/>
-      <parent link="${parent}"/>
-      <child link="${robot_namespace}/rotor_${id}"/>
+      <xacro:insert_block name="origin" />
+      <axis xyz="0 0 1" />
+      <parent link="${parent}" />
+      <child link="${robot_namespace}/rotor_${id}" />
     </joint>
 
     <gazebo>

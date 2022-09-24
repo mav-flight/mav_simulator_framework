@@ -19,5 +19,5 @@
   <!--
     Include the hummingbird base xacro
   -->
-  <xacro:include filename="$(find mav_description)/urdf/hummingbird_base.urdf.xacro"/>
+  <xacro:include filename="$(find mav_description)/urdf/hummingbird_base.urdf.xacro" />
 </robot>
