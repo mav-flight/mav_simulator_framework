@@ -37,17 +37,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Imports
+# Python Imports
 import os
-import xacro
+from typing import List
 
+# ROS Imports
 from ament_index_python.packages import get_package_share_directory
+from launch_ros.actions import Node
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import Command
 from launch.substitutions.launch_configuration import LaunchConfiguration
-from launch_ros.actions import Node
-from typing import List
 
 ## @cond PRIVATE
 # The launch description's initial arguments
@@ -113,10 +113,10 @@ def generate_launch_description() -> LaunchDescription:
                    ])
 
     # Define LaunchDescription variable
-    ld = LaunchDescription(ARGUMENTS)
+    launch_desc = LaunchDescription(ARGUMENTS)
 
     # Add nodes to LaunchDescription
-    ld.add_action(rsp_node)
-    ld.add_action(se_node)
+    launch_desc.add_action(rsp_node)
+    launch_desc.add_action(se_node)
 
-    return ld
+    return launch_desc

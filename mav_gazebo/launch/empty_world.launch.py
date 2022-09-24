@@ -35,9 +35,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Imports
+# Python Imports
 import os
+from typing import List
 
+# ROS Imports
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
@@ -45,7 +47,6 @@ from launch.actions import IncludeLaunchDescription
 from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions.launch_configuration import LaunchConfiguration
-from typing import List
 
 ## @cond PRIVATE
 # The launch description's initial arguments
@@ -96,10 +97,10 @@ def generate_launch_description() -> LaunchDescription:
         }.items())
 
     # Define LaunchDescription variable
-    ld = LaunchDescription(ARGUMENTS)
+    launch_desc = LaunchDescription(ARGUMENTS)
 
     # Add nodes to LaunchDescription
-    ld.add_action(gzserver_launch)
-    ld.add_action(gzclient_launch)
+    launch_desc.add_action(gzserver_launch)
+    launch_desc.add_action(gzclient_launch)
 
-    return ld
+    return launch_desc

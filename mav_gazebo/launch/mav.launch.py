@@ -37,9 +37,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Imports
+# Python Imports
 import os
 
+# ROS Imports
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription
@@ -75,10 +76,10 @@ def generate_launch_description() -> LaunchDescription:
         }.items())
 
     # Define LaunchDescription variable
-    ld = LaunchDescription()
+    launch_desc = LaunchDescription()
 
     # Add nodes to LaunchDescription
-    ld.add_action(gz_launch)
-    ld.add_action(mav_launch)
+    launch_desc.add_action(gz_launch)
+    launch_desc.add_action(mav_launch)
 
-    return ld
+    return launch_desc
