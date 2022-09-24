@@ -88,7 +88,7 @@ class GazeboRosMotorModelPrivate;
 /// @brief  Class for custom gazebo rotor's motor model.
 /// @details  Attach plugin to a gazebo MAV rotor's and publish ROS message
 ///           output.
-/// @note Example usage:
+/// @note  Example usage:
 ///   @code{.xml}
 ///     <gazebo>
 ///       <plugin name="gazebo_ros_motor_model"
@@ -128,7 +128,7 @@ class GazeboRosMotorModel : public gazebo::ModelPlugin {
   //////////////////////////////////////
 
   /// @brief  Load the plugin
-  /// @details  Gazebo calls this when the plugin is loaded.
+  /// @details  Gazebo calls this method when the plugin is loaded.
   /// @param[in]  _model  Pointer to parent model.
   /// @param[in]  _sdf  SDF element containing user-defined parameters.
   void Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _sdf) override;
@@ -138,7 +138,7 @@ class GazeboRosMotorModel : public gazebo::ModelPlugin {
   ////////////  Class Members  ///////////
   ////////////////////////////////////////
 
-  /// Recommented PIMPL pattern.
+  /// Recommended PIMPL pattern.
   /// This variable should hold all private data members.
   std::unique_ptr<GazeboRosMotorModelPrivate> impl_;
 };  // class GazeboRosMotorModel

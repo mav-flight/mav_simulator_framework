@@ -57,6 +57,33 @@ if(${ROS_VERSION} EQUAL 2)
     )
   endif()
 
+  # =============== gazebo_ros_multirotor_model plugin ===============
+  add_library(gazebo_ros_multirotor_model SHARED
+    src/mav_gazebo_plugins/gazebo_ros_multirotor_model.cpp
+  )
+  target_include_directories(
+    gazebo_ros_multirotor_model PUBLIC include
+  )
+  ament_target_dependencies(gazebo_ros_multirotor_model
+    gazebo_dev
+    gazebo_ros
+    rclcpp
+  )
+  ament_export_libraries(gazebo_ros_multirotor_model)
+  install(TARGETS
+      gazebo_ros_multirotor_model
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin)
+  if(ENABLE_PROFILER)
+    target_include_directories(
+      gazebo_ros_multirotor_model PUBLIC ${ignition-common3_INCLUDE_DIRS}
+    )
+    target_link_libraries(
+      gazebo_ros_multirotor_model ${ignition-common3_LIBRARIES}
+    )
+  endif()
+
   if(BUILD_TESTING)
     find_package(ament_lint_auto REQUIRED)
     ament_lint_auto_find_test_dependencies()

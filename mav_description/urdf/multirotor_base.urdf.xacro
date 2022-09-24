@@ -73,6 +73,18 @@
       <parent link="${robot_namespace}/base_link" />
       <child link="${robot_namespace}/base_link_inertia" />
     </joint>
+
+    <gazebo>
+      <plugin name="${robot_namespace}_multirotor_model"
+        filename="libgazebo_ros_multirotor_model.so">
+        <!-- -->
+        <ros>
+          <namespace>${robot_namespace}</namespace>
+        </ros>
+
+        <link_name>${robot_namespace}/base_link</link_name>
+      </plugin>
+    </gazebo>
   </xacro:macro>
 
   <!--
