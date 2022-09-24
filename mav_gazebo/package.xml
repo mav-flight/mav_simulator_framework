@@ -4,7 +4,7 @@
   <name>mav_gazebo</name>
   <version>0.0.0</version>
   <description>The package to spawn MAV's URDF models to gazebo</description>
-  <maintainer email="4303534+suresh-guttikonda@users.noreply.github.com">Suresh G</maintainer>
+  <maintainer email="4303534+sguttikon@users.noreply.github.com">Suresh G</maintainer>
   <license>Apache License 2.0</license>
 
   <author>Fadri Furrer</author>

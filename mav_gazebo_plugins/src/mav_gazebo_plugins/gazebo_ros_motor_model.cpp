@@ -40,7 +40,7 @@
 #include <gazebo_ros/node.hpp>
 
 // ROS headers
-#include <std_msgs/msg/float32.hpp>
+#include <std_msgs/msg/float64.hpp>
 
 // Mav-Gazebo headers
 #include "mav_gazebo_plugins/gazebo_ros_common.h"
@@ -76,7 +76,7 @@ class GazeboRosMotorModelPrivate {
   /// @brief  Control input callback
   /// @details  Callback for every motor control input.
   /// @param[in]  _msg Control command message.
-  void OnControlInput(const std_msgs::msg::Float32::SharedPtr _msg);
+  void OnControlInput(const std_msgs::msg::Float64::SharedPtr _msg);
 
   ////////////////////////////////////////
   ////////////  Class Members  ///////////
@@ -108,10 +108,10 @@ class GazeboRosMotorModelPrivate {
   double ref_ctrl_input_;
 
   /// Motor control input subscriber.
-  rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr ctrl_input_sub_;
+  rclcpp::Subscription<std_msgs::msg::Float64>::SharedPtr ctrl_input_sub_;
 
   /// Motor angular velocity publisher.
-  rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr angular_velocity_pub_;
+  rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr angular_velocity_pub_;
 
   /// First order filter for angular speed.
   std::unique_ptr<FirstOrderFilter<double>> angular_speed_filter_;
@@ -120,7 +120,7 @@ class GazeboRosMotorModelPrivate {
   ignition::math::Vector3d wind_speed_W_;
 
   /// Motor angular velocity.
-  std_msgs::msg::Float32 velocity_msg_;
+  std_msgs::msg::Float64 velocity_msg_;
 
   /// Protect variables accessed on callbacks.
   std::mutex lock_;
@@ -286,7 +286,7 @@ void GazeboRosMotorModel::Load(gazebo::physics::ModelPtr _model,
   switch (impl_->ctrl_type_) {
     case MotorControlType::kAngularSpeed: {
       impl_->ctrl_input_sub_ =
-          (impl_->ros_node_->create_subscription<std_msgs::msg::Float32>(
+          (impl_->ros_node_->create_subscription<std_msgs::msg::Float64>(
               "control_input",
               qos.get_subscription_qos("control_input", rclcpp::QoS(1)),
               std::bind(&GazeboRosMotorModelPrivate::OnControlInput,
@@ -305,7 +305,7 @@ void GazeboRosMotorModel::Load(gazebo::physics::ModelPtr _model,
   impl_->publish_velocity_ = _sdf->Get<bool>("publish_velocity", true).first;
   if (impl_->publish_velocity_) {
     impl_->angular_velocity_pub_ =
-        (impl_->ros_node_->create_publisher<std_msgs::msg::Float32>(
+        (impl_->ros_node_->create_publisher<std_msgs::msg::Float64>(
             "angular_velocity",
             qos.get_publisher_qos("angular_velocity", rclcpp::QoS(1))));
 
@@ -443,7 +443,7 @@ void GazeboRosMotorModelPrivate::OnUpdate(
 
 ///
 void GazeboRosMotorModelPrivate::OnControlInput(
-    const std_msgs::msg::Float32::SharedPtr _msg) {
+    const std_msgs::msg::Float64::SharedPtr _msg) {
   std::lock_guard<std::mutex> lock(lock_);
 
   switch (ctrl_type_) {

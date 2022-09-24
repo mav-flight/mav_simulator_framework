@@ -4,7 +4,7 @@
   <name>mav_gazebo_plugins</name>
   <version>0.0.0</version>
   <description>MAV gazebo simulator plugins package</description>
-  <maintainer email="4303534+suresh-guttikonda@users.noreply.github.com">Suresh G</maintainer>
+  <maintainer email="4303534+sguttikon@users.noreply.github.com">Suresh G</maintainer>
   <license>Apache License 2.0</license>
 
   <author>Fadri Furrer</author>
@@ -20,6 +20,7 @@
 
   <depend condition="$ROS_VERSION == 2">gazebo_dev</depend>
   <depend condition="$ROS_VERSION == 2">gazebo_ros</depend>
+  <depend condition="$ROS_VERSION == 2">mav_msgs</depend>
   <depend condition="$ROS_VERSION == 2">rclcpp</depend>
   <depend condition="$ROS_VERSION == 2">std_msgs</depend>
 
