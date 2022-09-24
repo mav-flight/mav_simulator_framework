@@ -61,11 +61,13 @@ ARGUMENTS: List[DeclareLaunchArgument] = [
     DeclareLaunchArgument(name="verbose",
                           default_value="false",
                           choices=["true", "false"],
-                          description="Whether to display the gzserver/gzclient logs"),
+                          description="Whether to display gzserver and "
+                                      "gzclient logs"),
     DeclareLaunchArgument(name="pause",
                           default_value="false",
                           choices=["true", "false"],
-                          description="Whether to start the gzserver in a paused state"),
+                          description="Whether to start gzserver in a "
+                                      "paused state"),
 ]
 ## @endcond
 
