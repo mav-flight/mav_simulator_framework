@@ -25,6 +25,7 @@ if(${ROS_VERSION} EQUAL 2)
   find_package(gazebo_ros REQUIRED)
   find_package(mav_msgs REQUIRED)
   find_package(rclcpp REQUIRED)
+  find_package(sensor_msgs REQUIRED)
   find_package(std_msgs REQUIRED)
 
   option(ENABLE_PROFILER "Enable Ignition Profiler" FALSE)
@@ -37,10 +38,10 @@ if(${ROS_VERSION} EQUAL 2)
     gazebo_ros_motor_model PUBLIC include
   )
   ament_target_dependencies(gazebo_ros_motor_model
-    gazebo_dev
-    gazebo_ros
-    rclcpp
-    std_msgs
+    "gazebo_dev"
+    "gazebo_ros"
+    "rclcpp"
+    "std_msgs"
   )
   ament_export_libraries(gazebo_ros_motor_model)
   install(TARGETS
@@ -65,9 +66,10 @@ if(${ROS_VERSION} EQUAL 2)
     gazebo_ros_multirotor_model PUBLIC include
   )
   ament_target_dependencies(gazebo_ros_multirotor_model
-    gazebo_dev
-    gazebo_ros
-    rclcpp
+    "gazebo_dev"
+    "gazebo_ros"
+    "rclcpp"
+    "sensor_msgs"
   )
   ament_export_libraries(gazebo_ros_multirotor_model)
   install(TARGETS

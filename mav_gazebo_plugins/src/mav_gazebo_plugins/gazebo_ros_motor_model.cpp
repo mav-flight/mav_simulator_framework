@@ -40,10 +40,12 @@
 #include <gazebo_ros/node.hpp>
 
 // ROS headers
+#include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/float64.hpp>
 
 // Mav-Gazebo headers
 #include "mav_gazebo_plugins/gazebo_ros_common.h"
+#include "mav_gazebo_plugins/gazebo_ros_constants.h"
 
 // Conditional headers
 #ifdef IGN_PROFILER_ENABLE
@@ -340,25 +342,21 @@ void GazeboRosMotorModelPrivate::OnUpdate(
 #endif
   std::lock_guard<std::mutex> lock(lock_);
 
-#ifdef IGN_PROFILER_ENABLE
-  IGN_PROFILE_BEGIN("fill ROS message");
-#endif
   gazebo::common::Time current_time = _info.simTime;
   sampling_time_ = (current_time - last_update_time_).Double();
-
+  // Check period
   if (sampling_time_ < update_period_) {
     return;
   }
 #ifdef IGN_PROFILER_ENABLE
-  IGN_PROFILE_END();
+  IGN_PROFILE_BEGIN("fill ROS message");
 #endif
-
   // Get: simulation time scaled motor's angular velocity
   double angular_velocity = joint_->GetVelocity(0) * sim_slowdown_;
   double angular_speed = std::abs(angular_velocity);
   int angular_velocity_sign = sgn(angular_velocity);
-
 #ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
   IGN_PROFILE_BEGIN("apply thrust");
 #endif
   // Compute thrust = k_h * \omega**2
@@ -432,12 +430,14 @@ void GazeboRosMotorModelPrivate::OnUpdate(
 #ifdef IGN_PROFILER_ENABLE
     IGN_PROFILE_BEGIN("publish angular_velocity");
 #endif
+    // Publish
     velocity_msg_.data = joint_->GetVelocity(0);
     angular_velocity_pub_->publish(velocity_msg_);
 #ifdef IGN_PROFILER_ENABLE
     IGN_PROFILE_END();
 #endif
   }
+  // Update time
   last_update_time_ = current_time;
 }
 
