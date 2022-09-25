@@ -80,9 +80,14 @@
         <!-- -->
         <ros>
           <namespace>${robot_namespace}</namespace>
+          <remapping>joint_states:=joint_states</remapping>
         </ros>
 
         <link_name>${robot_namespace}/base_link</link_name>
+
+        <!-- -->
+        <publish_states>true</publish_states>
+        <update_rate>100.0</update_rate>
       </plugin>
     </gazebo>
   </xacro:macro>

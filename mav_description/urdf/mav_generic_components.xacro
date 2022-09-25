@@ -16,4 +16,20 @@
   limitations under the License.
 -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <!--
+    Macro for the multirotor's controller interface
+  -->
+  <xacro:macro name="multirotor_controller" params="robot_namespace">
+    <gazebo>
+      <plugin name="${robot_namespace}_multirotor_controller"
+        filename="libgazebo_ros_multirotor_controller.so">
+        <!-- -->
+        <ros>
+          <namespace>${robot_namespace}</namespace>
+        </ros>
+
+        <link_name>${robot_namespace}/base_link</link_name>
+      </plugin>
+    </gazebo>
+  </xacro:macro>
 </robot>

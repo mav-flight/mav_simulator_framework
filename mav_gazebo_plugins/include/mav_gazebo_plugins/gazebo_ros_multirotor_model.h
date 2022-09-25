@@ -32,6 +32,7 @@
 
 // C++ headers
 #include <memory>
+#include <string>
 
 // Gazebo headers
 #include <gazebo/common/Plugin.hh>
@@ -40,6 +41,9 @@ namespace mav_gazebo_plugins {
 // Forward declaration of private data class.
 /// @class  GazeboRosMultirotorModelPrivate
 class GazeboRosMultirotorModelPrivate;
+
+/// Joint state topic publisher
+static const std::string kDefaultJointStatePubTopic = "joint_states";
 
 /// @class  GazeboRosMultirotorModel
 /// @brief  Class for custom gazebo MAV model.
@@ -51,9 +55,13 @@ class GazeboRosMultirotorModelPrivate;
 ///         filename="libgazebo_ros_multirotor_model.so">
 ///         <ros>
 ///           <namespace>demo</namespace>
+///           <remapping>joint_states:=joint_states_demo</remapping>
 ///         </ros>
 ///
 ///         <link_name>demo_link</link_name>
+///
+///         <publish_states>true</publish_states>
+///         <update_rate>100.0</update_rate>
 ///       </plugin>
 ///     </gazebo>
 ///   @endcode

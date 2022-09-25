@@ -12,11 +12,11 @@
 // limitations under the License.
 
 /*!
- *  @file       gazebo_ros_motor_model.h
- *  @brief      A custom gazebo plugin for MAV motor's common functionalities
- *              declarations.
- *  @details    Defines a custom MAV motor's functionalities used by
- *              other packages in the gazebo API.
+ *  @file       gazebo_ros_multirotor_controller.h
+ *  @brief      A custom gazebo plugin for MAV controller interface
+ *              functionalities declarations.
+ *  @details    Defines a custom MAV controller interface functionalities
+ *              used by other packages in the gazebo API.
  *  @author     Fadri Furrer, ASL, ETH Zurich
  *  @author     Michael Burri, ASL, ETH Zurich
  *  @author     Mina Kamel, ASL, ETH Zurich
@@ -25,7 +25,7 @@
  *  @author     Geoffrey Hunter
  *  @author     Suresh G
  *  @version    0.0.0
- *  @date       @showdate "%B %d, %Y" 2022-09-17
+ *  @date       @showdate "%B %d, %Y" 2022-09-25
  *  @copyright  Apache License, Version 2.0
  */
 #pragma once
@@ -37,69 +37,37 @@
 #include <gazebo/common/Plugin.hh>
 
 namespace mav_gazebo_plugins {
-/// @enum MotorControlType
-/// @brief  Enum to hold types of motor control
-/// @details
-enum class MotorControlType {
-  kAngularSpeed = 0,
-};
-
-/// @brief  Return the signum (-1, 0, 1) of the input value.
-/// @param[in]  val The input value.
-/// @return The sign of the input value.
-/// @tparam T Any C/C++ data type.
-template <typename T>
-inline int sgn(T val) {
-  return (T(0) < val) - (val < T(0));
-}
-
-/// Angular velocity topic publisher
-static const std::string kDefaultAngularVelocityPubTopic = "angular_velocity";
-
-/// Control input topic subscriber
-static const std::string kDefaultControlInputSubTopic = "control_input";
-
 // Forward declaration of private data class.
-/// @class  GazeboRosMotorModelPrivate
-class GazeboRosMotorModelPrivate;
+/// @class  GazeboRosMultirotorControllerPrivate
+class GazeboRosMultirotorControllerPrivate;
 
-/// @class  GazeboRosMotorModel
-/// @brief  Class for custom gazebo rotor's motor model.
-/// @details  Attach plugin to a gazebo MAV rotor's and publish ROS message
-///           output.
+/// @class  GazeboRosMultirotorController
+/// @brief  Class for custom gazebo MAV controller interface.
+/// @details  Attach plugin to a gazebo MAV and publish ROS message output.
 /// @note  Example usage:
 ///   @code{.xml}
-///     <gazebo>
-///       <plugin name="gazebo_ros_motor_model"
-///           filename="libgazebo_ros_motor_model.so">
-///         <ros>
-///           <namespace>demo</namespace>
-///           <remapping>angular_velocity:=angular_velocity_demo</remapping>
-///           <remapping>control_input:=control_input_demo</remapping>
-///         </ros>
+///   <gazebo>
+///   <plugin name="gazebo_ros_multirotor_controller"
+///     filename="libgazebo_ros_multirotor_controller.so">
+///     <ros>
+///       <namespace>demo</namespace>
+///     </ros>
 ///
-///         <joint_name>demo_joint</joint_name>
-///         <link_name>demo_link/link_name>
-///         <rotation_direction>ccw</rotation_direction>
-///         <control_type>angular_speed</control_type>
-///
-///         <publish_velocity>true</publish_velocity>
-///         <update_rate>100.0</update_rate>
-///       </plugin>
-///     </gazebo>
+///     <link_name>demo_link</link_name>
+///   </plugin>
+///   </gazebo>
 ///   @endcode
-///
-class GazeboRosMotorModel : public gazebo::ModelPlugin {
+class GazeboRosMultirotorController : public gazebo::ModelPlugin {
  public:
   ///////////////////////////////////////////////////
   //////////// Constructors & Destructors ///////////
   ///////////////////////////////////////////////////
 
   /// @brief  Default Constructor
-  GazeboRosMotorModel();
+  GazeboRosMultirotorController();
 
   /// @brief  Destructor
-  virtual ~GazeboRosMotorModel();
+  virtual ~GazeboRosMultirotorController();
 
  protected:
   //////////////////////////////////////
@@ -119,6 +87,6 @@ class GazeboRosMotorModel : public gazebo::ModelPlugin {
 
   /// Recommended PIMPL pattern.
   /// This variable should hold all private data members.
-  std::unique_ptr<GazeboRosMotorModelPrivate> impl_;
-};  // class GazeboRosMotorModel
+  std::unique_ptr<GazeboRosMultirotorControllerPrivate> impl_;
+};  // class GazeboRosMultirotorController
 }  // namespace mav_gazebo_plugins

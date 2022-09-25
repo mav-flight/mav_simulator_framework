@@ -33,6 +33,7 @@
 // Gazebo headers
 #include <gazebo/common/Events.hh>
 #include <gazebo/common/Time.hh>
+#include <gazebo/common/UpdateInfo.hh>
 #include <gazebo/physics/Joint.hh>
 #include <gazebo/physics/Link.hh>
 #include <gazebo/physics/Model.hh>
@@ -289,8 +290,9 @@ void GazeboRosMotorModel::Load(gazebo::physics::ModelPtr _model,
     case MotorControlType::kAngularSpeed: {
       impl_->ctrl_input_sub_ =
           (impl_->ros_node_->create_subscription<std_msgs::msg::Float64>(
-              "control_input",
-              qos.get_subscription_qos("control_input", rclcpp::QoS(1)),
+              kDefaultControlInputSubTopic,
+              qos.get_subscription_qos(kDefaultControlInputSubTopic,
+                                       rclcpp::QoS(1)),
               std::bind(&GazeboRosMotorModelPrivate::OnControlInput,
                         impl_.get(), std::placeholders::_1)));
       break;
@@ -308,8 +310,9 @@ void GazeboRosMotorModel::Load(gazebo::physics::ModelPtr _model,
   if (impl_->publish_velocity_) {
     impl_->angular_velocity_pub_ =
         (impl_->ros_node_->create_publisher<std_msgs::msg::Float64>(
-            "angular_velocity",
-            qos.get_publisher_qos("angular_velocity", rclcpp::QoS(1))));
+            kDefaultAngularVelocityPubTopic,
+            qos.get_publisher_qos(kDefaultAngularVelocityPubTopic,
+                                  rclcpp::QoS(1))));
 
     RCLCPP_INFO(impl_->ros_node_->get_logger(),
                 "Advertise angular velocity on [%s]",

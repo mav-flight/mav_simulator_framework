@@ -17,7 +17,16 @@
 -->
 <robot name="hummingbird" xmlns:xacro="http://ros.org/wiki/xacro">
   <!--
-    Include the hummingbird base xacro
+    Include the multirotor generic components
+  -->
+  <xacro:include filename="$(find mav_description)/urdf/mav_generic_components.xacro" />
+
+  <!--
+    Instantiate the hummingbird mechanics
   -->
   <xacro:include filename="$(find mav_description)/urdf/hummingbird_base.urdf.xacro" />
+  <!--
+    Instantiate the corresponding controller
+  -->
+  <xacro:multirotor_controller robot_namespace="$(arg namespace)" />
 </robot>

@@ -13,10 +13,10 @@
 
 /*!
  *  @file       gazebo_ros_multirotor_model.cpp
- *  @brief      A custom gazebo plugin for MAV interface functionalities
- *              definitions.
- *  @details    Defines a custom MAV interface functionalities used by
- *              other packages in the gazebo API.
+ *  @brief      A custom gazebo plugin for MAV controller interface
+ *              functionalities definitions.
+ *  @details    Defines a custom MAV controller interface functionalities
+ *              used by other packages in the gazebo API.
  *  @author     Fadri Furrer, ASL, ETH Zurich
  *  @author     Michael Burri, ASL, ETH Zurich
  *  @author     Mina Kamel, ASL, ETH Zurich
@@ -25,26 +25,24 @@
  *  @author     Geoffrey Hunter
  *  @author     Suresh G
  *  @version    0.0.0
- *  @date       @showdate "%B %d, %Y" 2022-09-24
+ *  @date       @showdate "%B %d, %Y" 2022-09-25
  *  @copyright  Apache License, Version 2.0
  */
-#include "mav_gazebo_plugins/gazebo_ros_multirotor_model.h"
+#include "mav_gazebo_plugins/gazebo_ros_multirotor_controller.h"
 
 // Gazebo headers
-#include <gazebo/common/Events.hh>
+#include <gazebo/common/Event.hh>
 #include <gazebo/common/Time.hh>
 #include <gazebo/common/UpdateInfo.hh>
-#include <gazebo/physics/Link.hh>
+#include <gazebo/physics/Light.hh>
 #include <gazebo/physics/Model.hh>
 #include <gazebo/physics/physics.hh>
-#include <gazebo_ros/conversions/builtin_interfaces.hpp>
 #include <gazebo_ros/node.hpp>
 
 // ROS headers
 #include <rclcpp/rclcpp.hpp>
-#include <sensor_msgs/msg/joint_state.hpp>
 
-// Mav-Gazebo headers
+// MAV-Gazebo headers
 #include "mav_gazebo_plugins/gazebo_ros_constants.h"
 
 // Conditional headers
@@ -54,17 +52,17 @@
 
 namespace mav_gazebo_plugins {
 /// @brief  Class to hold private data members (PIMPL pattern)
-class GazeboRosMultirotorModelPrivate {
+class GazeboRosMultirotorControllerPrivate {
  public:
   ///////////////////////////////////////////////////
   //////////// Constructors & Destructors ///////////
   ///////////////////////////////////////////////////
 
   /// @brief  Default Constructor
-  GazeboRosMultirotorModelPrivate();
+  GazeboRosMultirotorControllerPrivate();
 
   /// @brief  Destructor
-  ~GazeboRosMultirotorModelPrivate();
+  ~GazeboRosMultirotorControllerPrivate();
 
   //////////////////////////////////////
   //////////// Class Methods ///////////
@@ -91,38 +89,26 @@ class GazeboRosMultirotorModelPrivate {
   /// Pointer to gazebo link.
   gazebo::physics::LinkPtr link_;
 
-  /// Joint state publisher.
-  rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr joint_state_pub_;
-
-  /// Joints being tracked.
-  std::vector<gazebo::physics::JointPtr> joints_;
-
   /// Protect variables accessed on callbacks.
   std::mutex lock_;
-
-  /// Whether to publish joint state messages.
-  bool publish_states_;
-
-  /// Simulation physics slowdown
-  double sim_slowdown_;
 
   /// Update period in seconds.
   double update_period_;
 
   /// Last update time.
   gazebo::common::Time last_update_time_;
-};  // class GazeboRosMultirotorModelPrivate
+};  // class GazeboRosMultirotorControllerPrivate
 
 ///
-GazeboRosMultirotorModel::GazeboRosMultirotorModel()
-    : impl_(std::make_unique<GazeboRosMultirotorModelPrivate>()) {}
+GazeboRosMultirotorController::GazeboRosMultirotorController()
+    : impl_(std::make_unique<GazeboRosMultirotorControllerPrivate>()) {}
 
 ///
-GazeboRosMultirotorModel::~GazeboRosMultirotorModel() {}
+GazeboRosMultirotorController::~GazeboRosMultirotorController() {}
 
 ///
-void GazeboRosMultirotorModel::Load(gazebo::physics::ModelPtr _model,
-                                    sdf::ElementPtr _sdf) {
+void GazeboRosMultirotorController::Load(gazebo::physics::ModelPtr _model,
+                                         sdf::ElementPtr _sdf) {
   // Initialize model
   impl_->model_ = _model;
 
@@ -135,7 +121,7 @@ void GazeboRosMultirotorModel::Load(gazebo::physics::ModelPtr _model,
   // Get link details
   if (!_sdf->HasElement("link_name")) {
     RCLCPP_ERROR(impl_->ros_node_->get_logger(),
-                 "multirotor_model plugin missing <link_name>, "
+                 "multirotor_controller plugin missing <link_name>, "
                  "cannot proceed");
     impl_->ros_node_.reset();
     return;
@@ -150,109 +136,42 @@ void GazeboRosMultirotorModel::Load(gazebo::physics::ModelPtr _model,
     }
   }
 
-  // Get child joint details
-  auto child_joints = impl_->link_->GetChildJoints();
-  if (child_joints.size() == 0) {
-    RCLCPP_ERROR(impl_->ros_node_->get_logger(),
-                 "multirotor_model pluging missing child joints, "
-                 "cannot proceed");
-    impl_->ros_node_.reset();
-    return;
-  } else {
-    for (unsigned int i = 0; i < child_joints.size(); ++i) {
-      auto child_joint = child_joints[i];
-      if (!child_joint) {
-        RCLCPP_ERROR(impl_->ros_node_->get_logger(),
-                     "Joint does not exist. Skipping");
-      } else {
-        impl_->joints_.push_back(child_joint);
-      }
-    }
-  }
-
   // Get update rate
   auto update_rate = _sdf->Get<double>("update_rate", kDefaultUpdateRate).first;
   impl_->update_period_ = update_rate > 0.0 ? 1.0 / update_rate : 0.0;
   impl_->last_update_time_ = impl_->model_->GetWorld()->SimTime();
 
-  // Get constants
-  impl_->sim_slowdown_ =
-      _sdf->Get<double>("sim_slowdown", kDefaultSimSlowdown).first;
-
-  // Advertise the motor's angular velocity
-  impl_->publish_states_ = _sdf->Get<bool>("publish_states", true).first;
-  if (impl_->publish_states_) {
-    impl_->joint_state_pub_ =
-        (impl_->ros_node_->create_publisher<sensor_msgs::msg::JointState>(
-            kDefaultJointStatePubTopic,
-            qos.get_publisher_qos(kDefaultJointStatePubTopic,
-                                  rclcpp::QoS(1000))));
-
-    RCLCPP_INFO(impl_->ros_node_->get_logger(),
-                "Advertise joint states on [%s]",
-                impl_->joint_state_pub_->get_topic_name());
-  }
-
   // Listen to the update event (broadcast every simulation iteration)
   impl_->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
-      std::bind(&GazeboRosMultirotorModelPrivate::OnUpdate, impl_.get(),
+      std::bind(&GazeboRosMultirotorControllerPrivate::OnUpdate, impl_.get(),
                 std::placeholders::_1));
 }
 
 ///
-GazeboRosMultirotorModelPrivate::GazeboRosMultirotorModelPrivate() {}
+GazeboRosMultirotorControllerPrivate::GazeboRosMultirotorControllerPrivate() {}
 
 ///
-GazeboRosMultirotorModelPrivate::~GazeboRosMultirotorModelPrivate() {}
+GazeboRosMultirotorControllerPrivate::~GazeboRosMultirotorControllerPrivate() {}
 
 ///
-void GazeboRosMultirotorModelPrivate::OnUpdate(
+void GazeboRosMultirotorControllerPrivate::OnUpdate(
     const gazebo::common::UpdateInfo& _info) {
 #ifdef IGN_PROFILER_ENABLE
-  IGN_PROFILE("GazeboRosMultirotorModelPrivate::OnUpdate");
+  IGN_PROFILE("GazeboRosMultirotorControllerPrivate::OnUpdate");
 #endif
   std::lock_guard<std::mutex> lock(lock_);
 
   gazebo::common::Time current_time = _info.simTime;
-  double sampling_time = (current_time - last_update_time_).Double();
-  // Check period
-  if (sampling_time < update_period_) {
-    return;
-  }
-#ifdef IGN_PROFILER_ENABLE
+#ifdef IGN_PROFILE_ENABLE
   IGN_PROFILE_BEGIN("fill ROS message");
 #endif
-  // Populate message
-  sensor_msgs::msg::JointState joint_state_msg;
-  joint_state_msg.header.stamp =
-      gazebo_ros::Convert<builtin_interfaces::msg::Time>(current_time);
-  joint_state_msg.name.resize(joints_.size());
-  joint_state_msg.position.resize(joints_.size());
-  joint_state_msg.velocity.resize(joints_.size());
-
-  for (unsigned int i = 0; i < joints_.size(); ++i) {
-    auto joint = joints_[i];
-    joint_state_msg.name[i] = joint->GetName();
-    joint_state_msg.position[i] = joint->Position(0);
-    joint_state_msg.velocity[i] = joint->GetVelocity(0) * sim_slowdown_;
-  }
-#ifdef IGN_PROFILER_ENABLE
+#ifdef IGN_PROFILE_ENABLE
   IGN_PROFILE_END();
 #endif
-  if (publish_states_) {
-#ifdef IGN_PROFILER_ENABLE
-    IGN_PROFILE_BEGIN("publish joint_states");
-#endif
-    // Publish
-    joint_state_pub_->publish(joint_state_msg);
-#ifdef IGN_PROFILER_ENABLE
-    IGN_PROFILE_END();
-#endif
-  }
   // Update time
   last_update_time_ = current_time;
 }
 
 // Register this plugin with the simulator
-GZ_REGISTER_MODEL_PLUGIN(GazeboRosMultirotorModel)
+GZ_REGISTER_MODEL_PLUGIN(GazeboRosMultirotorController)
 }  // namespace mav_gazebo_plugins
