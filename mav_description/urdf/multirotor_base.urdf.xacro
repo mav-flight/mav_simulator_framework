@@ -83,6 +83,7 @@
           <remapping>joint_states:=joint_states</remapping>
         </ros>
 
+        <!-- -->
         <link_name>${robot_namespace}/base_link</link_name>
 
         <!-- -->
@@ -134,6 +135,7 @@
           <remapping>control_input:=rotor_${id}/control_input</remapping>
         </ros>
 
+        <!-- -->
         <joint_name>${robot_namespace}/rotor_${id}_joint</joint_name>
         <link_name>${robot_namespace}/rotor_${id}</link_name>
         <rotation_direction>${direction}</rotation_direction>

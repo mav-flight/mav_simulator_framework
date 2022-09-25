@@ -41,6 +41,12 @@ namespace mav_gazebo_plugins {
 /// @class  GazeboRosMultirotorControllerPrivate
 class GazeboRosMultirotorControllerPrivate;
 
+/// Control input topic publisher
+static const std::string kDefaultControlInputPubTopic = "control_input";
+
+/// Actuators control input topic subscriber
+static const std::string kDefaultActuatorsInputSubTopic = "actuators_input";
+
 /// @class  GazeboRosMultirotorController
 /// @brief  Class for custom gazebo MAV controller interface.
 /// @details  Attach plugin to a gazebo MAV and publish ROS message output.

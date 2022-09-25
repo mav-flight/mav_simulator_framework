@@ -154,7 +154,7 @@ void GazeboRosMultirotorModel::Load(gazebo::physics::ModelPtr _model,
   auto child_joints = impl_->link_->GetChildJoints();
   if (child_joints.size() == 0) {
     RCLCPP_ERROR(impl_->ros_node_->get_logger(),
-                 "multirotor_model pluging missing child joints, "
+                 "multirotor_model pluging missing rotor joints, "
                  "cannot proceed");
     impl_->ros_node_.reset();
     return;
@@ -162,8 +162,10 @@ void GazeboRosMultirotorModel::Load(gazebo::physics::ModelPtr _model,
     for (unsigned int i = 0; i < child_joints.size(); ++i) {
       auto child_joint = child_joints[i];
       if (!child_joint) {
-        RCLCPP_ERROR(impl_->ros_node_->get_logger(),
-                     "Joint does not exist. Skipping");
+        RCLCPP_WARN(impl_->ros_node_->get_logger(), "Invalid joint. Skipping");
+      } else if (child_joint->GetName().find("rotor_") == std::string::npos) {
+        // skip non-rotor joints
+        continue;
       } else {
         impl_->joints_.push_back(child_joint);
       }

@@ -97,6 +97,7 @@ if(${ROS_VERSION} EQUAL 2)
     "gazebo_dev"
     "gazebo_ros"
     "rclcpp"
+    "mav_msgs"
   )
   ament_export_libraries(gazebo_ros_multirotor_controller)
   install(TARGETS

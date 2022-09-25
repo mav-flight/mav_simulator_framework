@@ -41,9 +41,11 @@
 
 // ROS headers
 #include <rclcpp/rclcpp.hpp>
+#include <std_msgs/msg/float64.hpp>
 
 // MAV-Gazebo headers
 #include "mav_gazebo_plugins/gazebo_ros_constants.h"
+#include "mav_msgs/msg/actuators.hpp"
 
 // Conditional headers
 #ifdef IGN_PROFILE_ENABLE
@@ -73,6 +75,11 @@ class GazeboRosMultirotorControllerPrivate {
   /// @param[in]  _info Updated simulation info.
   void OnUpdate(const gazebo::common::UpdateInfo& _info);
 
+  /// @brief  Actuators input callback
+  /// @details  Callback for every actuators control input.
+  /// @param[in]  _msg  Actuators command message.
+  void OnActuatorsInput(const mav_msgs::msg::Actuators::SharedPtr _msg);
+
   ////////////////////////////////////////
   ////////////  Class Members  ///////////
   ////////////////////////////////////////
@@ -88,6 +95,17 @@ class GazeboRosMultirotorControllerPrivate {
 
   /// Pointer to gazebo link.
   gazebo::physics::LinkPtr link_;
+
+  /// Multirotor's actuators control input subscriber.
+  rclcpp::Subscription<mav_msgs::msg::Actuators>::SharedPtr
+      actuators_input_sub_;
+
+  /// Motor control input publishers being tracked.
+  std::vector<rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr>
+      motor_ctrl_publishers_;
+
+  /// Motor control input being tracked.
+  std::vector<double> ref_motor_ctrls_;
 
   /// Protect variables accessed on callbacks.
   std::mutex lock_;
@@ -136,10 +154,51 @@ void GazeboRosMultirotorController::Load(gazebo::physics::ModelPtr _model,
     }
   }
 
+  // Advertise the motor's control input
+  auto child_links = impl_->link_->GetChildJointsLinks();
+  if (child_links.size() == 0) {
+    RCLCPP_ERROR(impl_->ros_node_->get_logger(),
+                 "multirotor_controller pluggin missing rotor joints, "
+                 "cannot proceed");
+    impl_->ros_node_.reset();
+    return;
+  } else {
+    for (unsigned int i = 0; i < child_links.size(); ++i) {
+      auto child_link = child_links[i];
+      if (!child_link) {
+        RCLCPP_WARN(impl_->ros_node_->get_logger(), "Invalid link. Skipping");
+      } else if (child_link->GetName().find("rotor_") == std::string::npos) {
+        // skip non-rotor links
+        continue;
+      } else {
+        impl_->motor_ctrl_publishers_.push_back(
+            impl_->ros_node_->create_publisher<std_msgs::msg::Float64>(
+                "rotor_" +
+                    std::to_string(impl_->motor_ctrl_publishers_.size()) + "/" +
+                    kDefaultControlInputPubTopic,
+                /*queue_size*/ 1));
+      }
+    }
+  }
+
+  // Initialize motor controls
+  impl_->ref_motor_ctrls_.resize(impl_->motor_ctrl_publishers_.size());
+  std::fill(impl_->ref_motor_ctrls_.begin(), impl_->ref_motor_ctrls_.end(),
+            0.0);
+
   // Get update rate
   auto update_rate = _sdf->Get<double>("update_rate", kDefaultUpdateRate).first;
   impl_->update_period_ = update_rate > 0.0 ? 1.0 / update_rate : 0.0;
   impl_->last_update_time_ = impl_->model_->GetWorld()->SimTime();
+
+  // Subscribe the actuators control input
+  impl_->actuators_input_sub_ =
+      impl_->ros_node_->create_subscription<mav_msgs::msg::Actuators>(
+          kDefaultActuatorsInputSubTopic,
+          qos.get_subscription_qos(kDefaultActuatorsInputSubTopic,
+                                   rclcpp::QoS(1)),
+          std::bind(&GazeboRosMultirotorControllerPrivate::OnActuatorsInput,
+                    impl_.get(), std::placeholders::_1));
 
   // Listen to the update event (broadcast every simulation iteration)
   impl_->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
@@ -162,14 +221,47 @@ void GazeboRosMultirotorControllerPrivate::OnUpdate(
   std::lock_guard<std::mutex> lock(lock_);
 
   gazebo::common::Time current_time = _info.simTime;
+  double sampling_time = (current_time - last_update_time_).Double();
+  // Check period
+  if (sampling_time < update_period_) {
+    return;
+  }
 #ifdef IGN_PROFILE_ENABLE
-  IGN_PROFILE_BEGIN("fill ROS message");
+  IGN_PROFILE_BEGIN("publish control_input");
 #endif
+  // Publish
+  if (motor_ctrl_publishers_.size() == ref_motor_ctrls_.size()) {
+    std_msgs::msg::Float64 ctrl_input_msg;
+    for (unsigned int i = 0; i < ref_motor_ctrls_.size(); ++i) {
+      ctrl_input_msg.data = ref_motor_ctrls_[i];
+      motor_ctrl_publishers_[i]->publish(ctrl_input_msg);
+    }
+  } else {
+    RCLCPP_WARN(ros_node_->get_logger(),
+                "Invalid actuators input size [%d]. Not Publishing",
+                ref_motor_ctrls_.size());
+  }
 #ifdef IGN_PROFILE_ENABLE
   IGN_PROFILE_END();
 #endif
   // Update time
   last_update_time_ = current_time;
+}
+
+///
+void GazeboRosMultirotorControllerPrivate::OnActuatorsInput(
+    const mav_msgs::msg::Actuators::SharedPtr _msg) {
+  std::lock_guard<std::mutex> lock(lock_);
+
+  if (motor_ctrl_publishers_.size() == _msg->motor_speeds.size()) {
+    for (unsigned int i = 0; i < _msg->motor_speeds.size(); ++i) {
+      ref_motor_ctrls_[i] = static_cast<double>(_msg->motor_speeds[i]);
+    }
+  } else {
+    // republish the last recevied commands
+    RCLCPP_WARN(ros_node_->get_logger(),
+                "Invalid actuators input received. Skipping");
+  }
 }
 
 // Register this plugin with the simulator

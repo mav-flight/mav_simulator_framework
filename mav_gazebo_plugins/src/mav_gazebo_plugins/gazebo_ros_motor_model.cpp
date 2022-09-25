@@ -289,12 +289,12 @@ void GazeboRosMotorModel::Load(gazebo::physics::ModelPtr _model,
   switch (impl_->ctrl_type_) {
     case MotorControlType::kAngularSpeed: {
       impl_->ctrl_input_sub_ =
-          (impl_->ros_node_->create_subscription<std_msgs::msg::Float64>(
+          impl_->ros_node_->create_subscription<std_msgs::msg::Float64>(
               kDefaultControlInputSubTopic,
               qos.get_subscription_qos(kDefaultControlInputSubTopic,
                                        rclcpp::QoS(1)),
               std::bind(&GazeboRosMotorModelPrivate::OnControlInput,
-                        impl_.get(), std::placeholders::_1)));
+                        impl_.get(), std::placeholders::_1));
       break;
     }
     default: {
