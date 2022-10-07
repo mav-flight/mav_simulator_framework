@@ -33,7 +33,7 @@
         <link_name>${robot_namespace}/base_link</link_name>
 
         <!-- -->
-        <update_rate>100.0</update_rate>
+        <update_rate>0.0</update_rate>
       </plugin>
     </gazebo>
   </xacro:macro>
