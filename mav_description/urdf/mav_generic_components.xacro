@@ -37,24 +37,4 @@
       </plugin>
     </gazebo>
   </xacro:macro>
-
-  <!-- 
-    Macro for the multirotor's IMU sensor
-  -->
-  <xacro:macro name="imu_sensor"
-    params="robot_namespace parent mass *inertia *origin">
-    <link name="${robot_namespace}/imu_link">
-      <inertial>
-        <mass value="${mass}" /> <!-- [kg] -->
-        <xacro:insert_block name="inertia" />
-      </inertial>
-      <!-- no visual and collision entries -->
-    </link>
-
-    <joint name="${robot_namespace}/imu_joint" type="fixed">
-      <xacro:insert_block name="origin" />
-      <parent link="${parent}" />
-      <child link="${robot_namespace}/imu_link" />
-    </joint>
-  </xacro:macro>
 </robot>

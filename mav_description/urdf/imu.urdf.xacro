@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<!--
+  Copyright 2022 Suresh G
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<robot name="imu" xmlns:xacro="http://ros.org/wiki/xacro">
+  <!--
+    Properties for the ADIS16448 IMU
+  -->
+  <xacro:property name="imu_mass" value="0.015" /> <!-- [kg] -->
+  <xacro:property name="imu_length" value="0.03" /> <!-- [m] -->
+  <xacro:property name="imu_width" value="0.03" /> <!-- [m] -->
+  <xacro:property name="imu_height" value="0.01" /> <!-- [m] -->
+
+  <!--
+    Property for the imu's inertia
+  -->
+  <xacro:property name="imu_inertia">
+    <inertia ixx="0.00001" ixy="0.0" ixz="0.0"
+             iyy="0.00001" iyz="0.0"
+             izz="0.00001" /> <!-- [kg m^2] ... -->
+  </xacro:property>
+
+  <!--
+    Macro for the ADIS16448 IMU body
+  -->
+  <xacro:macro name="imu_sensor"
+    params="robot_namespace parent color *origin">
+    <link name="${robot_namespace}/imu_link">
+      <inertial>
+        <mass value="${imu_mass}" /> <!-- [kg] -->
+        <origin xyz="0 0 0" />
+        <xacro:insert_block name="imu_inertia" />
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <box size="${imu_length} ${imu_width} ${imu_height}" /> <!-- [m] [m] [m] -->
+        </geometry>
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <box size="${imu_length} ${imu_width} ${imu_height}" /> <!-- [m] [m] [m] -->
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${robot_namespace}/imu_joint" type="fixed">
+      <xacro:insert_block name="origin" />
+      <parent link="${parent}" />
+      <child link="${robot_namespace}/imu_link" />
+    </joint>
+
+    <gazebo reference="${robot_namespace}/imu_link">
+      <material>Gazebo/${color}</material>
+    </gazebo>
+  </xacro:macro>
+</robot>
