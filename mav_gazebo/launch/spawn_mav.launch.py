@@ -76,6 +76,12 @@ def generate_launch_description() -> LaunchDescription:
     Returns:
         An instance of LaunchDescription class.
     """
+    # joint state publisher node
+    jsp_node = Node(package="joint_state_publisher",
+                    executable="joint_state_publisher",
+                    name="joint_state_publisher",
+                    output="screen")
+
     # robot state publisher node
     rsp_node = Node(package="robot_state_publisher",
                     executable="robot_state_publisher",
@@ -110,6 +116,7 @@ def generate_launch_description() -> LaunchDescription:
     launch_desc = LaunchDescription(ARGUMENTS)
 
     # Add nodes to LaunchDescription
+    launch_desc.add_action(jsp_node)
     launch_desc.add_action(rsp_node)
     launch_desc.add_action(se_node)
 

@@ -19,6 +19,7 @@
   <buildtool_depend condition="$ROS_VERSION == 2">ament_cmake</buildtool_depend>
 
   <depend condition="$ROS_VERSION == 2">gazebo_ros</depend>
+  <depend condition="$ROS_VERSION == 2">joint_state_publisher</depend>
   <depend condition="$ROS_VERSION == 2">mav_description</depend>
   <depend condition="$ROS_VERSION == 2">mav_gazebo_plugins</depend>
   <depend condition="$ROS_VERSION == 2">rclcpp</depend>
