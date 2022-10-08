@@ -98,7 +98,7 @@
   -->
   <xacro:macro name="vertical_rotor"
     params="robot_namespace suffix direction parent mass radius id color *origin *inertia">
-    <link name="${robot_namespace}/rotor_${id}">
+    <link name="${robot_namespace}/rotor_${id}_link">
       <inertial>
         <mass value="${mass}" /> <!-- [kg] -->
         <xacro:insert_block name="inertia" />
@@ -122,7 +122,7 @@
       <xacro:insert_block name="origin" />
       <axis xyz="0 0 1" />
       <parent link="${parent}" />
-      <child link="${robot_namespace}/rotor_${id}" />
+      <child link="${robot_namespace}/rotor_${id}_link" />
     </joint>
 
     <gazebo>
@@ -137,7 +137,7 @@
 
         <!-- -->
         <joint_name>${robot_namespace}/rotor_${id}_joint</joint_name>
-        <link_name>${robot_namespace}/rotor_${id}</link_name>
+        <link_name>${robot_namespace}/rotor_${id}_link</link_name>
         <rotation_direction>${direction}</rotation_direction>
         <control_type>angular_speed</control_type>
 
@@ -147,7 +147,7 @@
       </plugin>
     </gazebo>
 
-    <gazebo reference="${robot_namespace}/rotor_${id}">
+    <gazebo reference="${robot_namespace}/rotor_${id}_link">
       <material>Gazebo/${color}</material>
     </gazebo>
   </xacro:macro>
