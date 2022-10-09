@@ -17,6 +17,11 @@
 -->
 <robot name="hummingbird" xmlns:xacro="http://ros.org/wiki/xacro">
   <!--
+    Arguments for the Asctec Hummingbird
+  -->
+  <xacro:arg name="namespace" default="hummingbird" />
+
+  <!--
     Include the multirotor generic components
   -->
   <xacro:include filename="$(find mav_description)/urdf/mav_generic_components.xacro" />
@@ -32,16 +37,16 @@
   <!--
     Instantiate the hummingbird controller
   -->
-  <xacro:multirotor_controller robot_namespace="${namespace}" />
+  <xacro:multirotor_controller robot_namespace="$(arg namespace)" />
   <!--
     Instantiate the gt p3d interface
   -->
-  <xacro:gt_p3d robot_namespace="${namespace}" />
+  <xacro:gt_p3d robot_namespace="$(arg namespace)" />
   <!--
     Instantiate the imu sensor
   -->
-  <xacro:imu_sensor robot_namespace="${namespace}" color="Black"
-    parent="${namespace}/base_link">
+  <xacro:imu_sensor robot_namespace="$(arg namespace)" color="Black"
+    parent="$(arg namespace)/base_link">
     <origin xyz="0 0 0" rpy="0 0 0" />
   </xacro:imu_sensor>
 </robot>

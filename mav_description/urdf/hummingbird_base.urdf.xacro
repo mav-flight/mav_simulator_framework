@@ -20,7 +20,7 @@
     Properties for the Asctec Hummingbird
     reference Novel Dynamic Inversion Architectur Design for Quadrocopter Control by Wang et al.
   -->
-  <xacro:property name="namespace" value="$(arg namespace)" />
+  <xacro:property name="mav_namespace" value="$(arg namespace)" />
   <xacro:property name="mav_mesh_file" value="file://$(find mav_description)/meshes/hummingbird.dae" />
   <xacro:property name="body_mass" value="0.68" /> <!-- [kg] -->
   <xacro:property name="body_length" value="0.1" /> <!-- [m] -->
@@ -56,7 +56,7 @@
   <!--
     Instantiate the multirotor_base macro
   -->
-  <xacro:multirotor_base robot_namespace="${namespace}" mass="${body_mass}"
+  <xacro:multirotor_base robot_namespace="${mav_namespace}" mass="${body_mass}"
     length="${body_length}" width="${body_width}" height="${body_height}"
     mesh_file="${mav_mesh_file}">
     <xacro:insert_block name="body_inertia" />
@@ -65,8 +65,8 @@
   <!--
     Instantiate the front vertical_rotor macro
   -->
-  <xacro:vertical_rotor robot_namespace="${namespace}" suffix="front"
-    direction="cw" parent="${namespace}/base_link" mass="${rotor_mass}"
+  <xacro:vertical_rotor robot_namespace="${mav_namespace}" suffix="front"
+    direction="cw" parent="${mav_namespace}/base_link" mass="${rotor_mass}"
     radius="${rotor_radius}" id="0" color="Red">
     <origin xyz="${arm_length} 0 ${rotor_z_offset}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
@@ -75,8 +75,8 @@
   <!--
     Instantiate the left vertical_rotor macro
   -->
-  <xacro:vertical_rotor robot_namespace="${namespace}" suffix="left"
-    direction="ccw" parent="${namespace}/base_link" mass="${rotor_mass}"
+  <xacro:vertical_rotor robot_namespace="${mav_namespace}" suffix="left"
+    direction="ccw" parent="${mav_namespace}/base_link" mass="${rotor_mass}"
     radius="${rotor_radius}" id="1" color="Blue">
     <origin xyz="0 ${arm_length} ${rotor_z_offset}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
@@ -85,8 +85,8 @@
   <!--
     Instantiate the back vertical_rotor macro
   -->
-  <xacro:vertical_rotor robot_namespace="${namespace}" suffix="back"
-    direction="cw" parent="${namespace}/base_link" mass="${rotor_mass}"
+  <xacro:vertical_rotor robot_namespace="${mav_namespace}" suffix="back"
+    direction="cw" parent="${mav_namespace}/base_link" mass="${rotor_mass}"
     radius="${rotor_radius}" id="2" color="Blue">
     <origin xyz="-${arm_length} 0 ${rotor_z_offset}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
@@ -95,8 +95,8 @@
   <!--
     Instantiate the right vertical_rotor macro
   -->
-  <xacro:vertical_rotor robot_namespace="${namespace}" suffix="right"
-    direction="ccw" parent="${namespace}/base_link" mass="${rotor_mass}"
+  <xacro:vertical_rotor robot_namespace="${mav_namespace}" suffix="right"
+    direction="ccw" parent="${mav_namespace}/base_link" mass="${rotor_mass}"
     radius="${rotor_radius}" id="3" color="Blue">
     <origin xyz="0 -${arm_length} ${rotor_z_offset}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />

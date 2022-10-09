@@ -69,31 +69,37 @@
     <gazebo reference="${robot_namespace}/imu_link">
       <material>Gazebo/${color}</material>
       <sensor name="imu_sensor" type="imu">
-        <!-- -->
+        <!-- Ensure sensor is always active -->
         <always_on>true</always_on>
+
+        <!-- Update rate in Hz, defaults to 0.0, which means as fast as possible -->
         <update_rate>100</update_rate>
-        <!-- IMU Noise -->
+        
+        <!-- -->
         <imu>
+          <!-- Angular velocity noise model [rad/s] -->
           <angular_velocity>
             <x>
               <noise type="gaussian">
                 <mean>0.0</mean>
-                <stddev>2e-4</stddev>
+                <stddev>2.0e-4</stddev>
               </noise>
             </x>
             <y>
               <noise type="gaussian">
                 <mean>0.0</mean>
-                <stddev>2e-4</stddev>
+                <stddev>2.0e-4</stddev>
               </noise>
             </y>
             <z>
               <noise type="gaussian">
                 <mean>0.0</mean>
-                <stddev>2e-4</stddev>
+                <stddev>2.0e-4</stddev>
               </noise>
             </z>
           </angular_velocity>
+
+          <!-- Linear acceleration noise model [m/s^2] -->
           <linear_acceleration>
             <x>
               <noise type="gaussian">
@@ -119,11 +125,14 @@
           filename="libgazebo_ros_imu_sensor.so">
           <!-- -->
           <ros>
-            <namespace>${robot_namespace}/imu</namespace>
-            <remapping>~/out:=data</remapping>
+            <!-- Add a namespace -->
+            <namespace>${robot_namespace}</namespace>
+
+            <!-- Remap the imu topic -->
+            <remapping>~/out:=imu</remapping>
           </ros>
 
-          <!-- -->
+          <!-- To comply with REP 145 (world as orientation reference) -->
           <initial_orientation_as_reference>false</initial_orientation_as_reference>
         </plugin>
       </sensor>
