@@ -56,10 +56,18 @@ static const std::string kDefaultActuatorsInputSubTopic = "actuators_input";
 ///   <plugin name="gazebo_ros_multirotor_controller"
 ///     filename="libgazebo_ros_multirotor_controller.so">
 ///     <ros>
+///       <!-- Add a namespace -->
 ///       <namespace>demo</namespace>
+///
+///       <!-- Remap the actuator input topic -->
+///       <remapping>actuators_input:=actuators_input_demo</remapping>
 ///     </ros>
 ///
+///     <!-- Name of the link within this model whose actuators will be commanded -->
 ///     <link_name>demo_link</link_name>
+///
+///     <!-- Update rate in Hz, defaults to 0.0, which means as fast as possible -->
+///     <update_rate>100.0</update_rate>
 ///   </plugin>
 ///   </gazebo>
 ///   @endcode

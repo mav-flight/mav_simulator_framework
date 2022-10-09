@@ -188,7 +188,14 @@ void GazeboRosMultirotorController::Load(gazebo::physics::ModelPtr _model,
 
   // Get update rate
   auto update_rate = _sdf->Get<double>("update_rate", kDefaultUpdateRate).first;
-  impl_->update_period_ = update_rate > 0.0 ? 1.0 / update_rate : 0.0;
+  if (update_rate > 0.0) {
+    impl_->update_period_ = 1.0 / update_rate;
+  } else {
+    impl_->update_period_ = 0.0;
+    RCLCPP_DEBUG(impl_->ros_node_->get_logger(),
+                 "multirotor_controller plugin missing <update_rate>, "
+                 "defaults to 0.0 (as fast as possible).");
+  }
   impl_->last_update_time_ = impl_->model_->GetWorld()->SimTime();
 
   // Subscribe the actuators control input
@@ -254,11 +261,12 @@ void GazeboRosMultirotorControllerPrivate::OnActuatorsInput(
   std::lock_guard<std::mutex> lock(lock_);
 
   if (motor_ctrl_publishers_.size() == _msg->motor_speeds.size()) {
+    // latest commands
     for (unsigned int i = 0; i < _msg->motor_speeds.size(); ++i) {
       ref_motor_ctrls_[i] = static_cast<double>(_msg->motor_speeds[i]);
     }
   } else {
-    // republish the last recevied commands
+    // republish the last received commands
     RCLCPP_WARN(ros_node_->get_logger(),
                 "Invalid actuators input received. Skipping");
   }

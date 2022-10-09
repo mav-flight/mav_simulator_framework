@@ -174,7 +174,14 @@ void GazeboRosMultirotorModel::Load(gazebo::physics::ModelPtr _model,
 
   // Get update rate
   auto update_rate = _sdf->Get<double>("update_rate", kDefaultUpdateRate).first;
-  impl_->update_period_ = update_rate > 0.0 ? 1.0 / update_rate : 0.0;
+  if (update_rate > 0.0) {
+    impl_->update_period_ = 1.0 / update_rate;
+  } else {
+    impl_->update_period_ = 0.0;
+    RCLCPP_DEBUG(impl_->ros_node_->get_logger(),
+                 "multirotor_controller plugin missing <update_rate>, "
+                 "defaults to 0.0 (as fast as possible).");
+  }
   impl_->last_update_time_ = impl_->model_->GetWorld()->SimTime();
 
   // Get constants

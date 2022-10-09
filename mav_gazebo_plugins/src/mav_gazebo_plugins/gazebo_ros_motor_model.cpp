@@ -262,7 +262,14 @@ void GazeboRosMotorModel::Load(gazebo::physics::ModelPtr _model,
 
   // Get update rate
   auto update_rate = _sdf->Get<double>("update_rate", kDefaultUpdateRate).first;
-  impl_->update_period_ = update_rate > 0.0 ? 1.0 / update_rate : 0.0;
+  if (update_rate > 0.0) {
+    impl_->update_period_ = 1.0 / update_rate;
+  } else {
+    impl_->update_period_ = 0.0;
+    RCLCPP_DEBUG(impl_->ros_node_->get_logger(),
+                 "motor_model plugin missing <update_rate>, "
+                 "defaults to 0.0 (as fast as possible).");
+  }
   impl_->last_update_time_ = impl_->model_->GetWorld()->SimTime();
 
   // Get constants
@@ -421,7 +428,7 @@ void GazeboRosMotorModelPrivate::OnUpdate(
   double new_angular_speed = angular_speed_filter_->UpdateFilter(
       /*input_state*/ ref_ctrl_input_, /*sampling_time*/ sampling_time_);
 
-  // Set: simulation time scale motor's angular velocity
+  // Set: simulation time scaled motor's angular velocity
   joint_->SetVelocity(
       /*axis*/ 0,
       /*velocity*/ rotation_sign_ * new_angular_speed / sim_slowdown_);

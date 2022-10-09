@@ -54,13 +54,20 @@ static const std::string kDefaultJointStatePubTopic = "joint_states";
 ///       <plugin name="gazebo_ros_multirotor_model"
 ///         filename="libgazebo_ros_multirotor_model.so">
 ///         <ros>
+///           <!-- Add a namespace -->
 ///           <namespace>demo</namespace>
+///
+///           <!-- Remap the joint states topic -->
 ///           <remapping>joint_states:=joint_states_demo</remapping>
 ///         </ros>
 ///
+///         <!-- Name of the link within this model whose actuators' joint state will be published -->
 ///         <link_name>demo_link</link_name>
 ///
+///         <!-- Whether to publish the joint states -->
 ///         <publish_states>true</publish_states>
+///
+///         <!-- Update rate in Hz, defaults to 0.0, which means as fast as possible -->
 ///         <update_rate>100.0</update_rate>
 ///       </plugin>
 ///     </gazebo>

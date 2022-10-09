@@ -73,17 +73,32 @@ class GazeboRosMotorModelPrivate;
 ///       <plugin name="gazebo_ros_motor_model"
 ///           filename="libgazebo_ros_motor_model.so">
 ///         <ros>
+///           <!-- Add a namespace -->
 ///           <namespace>demo</namespace>
+///
+///           <!-- Remap the motor angular velocity topic -->
 ///           <remapping>angular_velocity:=angular_velocity_demo</remapping>
+///
+///           <!-- Remap the motor control input topic -->
 ///           <remapping>control_input:=control_input_demo</remapping>
 ///         </ros>
 ///
+///         <!-- Name of the motor joint within this model -->
 ///         <joint_name>demo_joint</joint_name>
+///
+///         <!-- Name of the motor link within this model -->
 ///         <link_name>demo_link/link_name>
+///
+///         <!-- motor rotation direction -->
 ///         <rotation_direction>ccw</rotation_direction>
+///
+///         <!-- motor control input type -->
 ///         <control_type>angular_speed</control_type>
 ///
+///         <!-- Whether to publish the angular velocities -->
 ///         <publish_velocity>true</publish_velocity>
+///
+///         <!-- Update rate in Hz, defaults to 0.0, which means as fast as possible -->
 ///         <update_rate>100.0</update_rate>
 ///       </plugin>
 ///     </gazebo>

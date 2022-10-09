@@ -25,15 +25,55 @@
         filename="libgazebo_ros_multirotor_controller.so">
         <!-- -->
         <ros>
+          <!-- Add a namespace -->
           <namespace>${robot_namespace}</namespace>
+
+          <!-- Remap the actuator input topic -->
           <remapping>actuators_input:=command/motor_speed</remapping>
         </ros>
 
-        <!-- -->
+        <!-- Name of the link within this model whose actuators will be commanded -->
         <link_name>${robot_namespace}/base_link</link_name>
 
-        <!-- -->
+        <!-- Update rate in Hz, defaults to 0.0, which means as fast as possible -->
         <update_rate>0.0</update_rate>
+      </plugin>
+    </gazebo>
+  </xacro:macro>
+
+  <!--
+    Macro for the multirotor's ground truth 3d position
+  -->
+  <xacro:macro name="gt_p3d" params="robot_namespace">
+    <gazebo>
+      <plugin name="${robot_namespace}_gt_p3d"
+          filename="libgazebo_ros_p3d.so">
+          <!-- -->
+          <ros>
+            <!-- Add a namespace -->
+            <namespace>${robot_namespace}</namespace>
+            
+            <!-- Remap the odom topic -->
+            <remapping>odom:=odom</remapping>
+          </ros>
+
+          <!-- Name of the link within this model whose pose will be published -->
+          <body_name>${robot_namespace}/base_link</body_name>
+
+          <!-- Name of another link within this model to use as a reference frame -->
+          <frame_name>world</frame_name>
+
+          <!-- Update rate in Hz, defaults to 0.0, which means as fast as possible -->
+          <update_rate>0.0</update_rate>
+
+          <!-- Translation offset to be added to the pose. -->
+          <xyz_offset>0.0 0.0 0.0</xyz_offset>
+          
+          <!-- Rotation offset to be added to the pose, in Euler angles. -->
+          <rpy_offset>0.0 0.0 0.0</rpy_offset>
+
+          <!-- Standard deviation of the noise to be added to the reported velocities. -->
+          <gaussian_noise>1.0e-2</gaussian_noise>
       </plugin>
     </gazebo>
   </xacro:macro>

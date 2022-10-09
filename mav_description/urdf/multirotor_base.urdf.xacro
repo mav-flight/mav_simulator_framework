@@ -79,15 +79,20 @@
         filename="libgazebo_ros_multirotor_model.so">
         <!-- -->
         <ros>
+          <!-- Add a namespace -->
           <namespace>${robot_namespace}</namespace>
+
+          <!-- Remap the joint states topic -->
           <remapping>joint_states:=joint_states</remapping>
         </ros>
 
-        <!-- -->
+        <!-- Name of the link within this model whose actuators' joint state will be published -->
         <link_name>${robot_namespace}/base_link</link_name>
 
-        <!-- -->
+        <!-- Whether to publish the joint states -->
         <publish_states>true</publish_states>
+
+        <!-- Update rate in Hz, defaults to 0.0, which means as fast as possible -->
         <update_rate>0.0</update_rate>
       </plugin>
     </gazebo>
@@ -130,19 +135,32 @@
         filename="libgazebo_ros_motor_model.so">
         <!-- -->
         <ros>
+          <!-- Add a namespace -->
           <namespace>${robot_namespace}</namespace>
+
+          <!-- Remap the motor angular velocity topic -->
           <remapping>angular_velocity:=rotor_${id}/angular_velocity</remapping>
+          
+          <!-- Remap the motor control input topic -->
           <remapping>control_input:=rotor_${id}/control_input</remapping>
         </ros>
 
-        <!-- -->
+        <!-- Name of the motor joint within this model -->
         <joint_name>${robot_namespace}/rotor_${id}_joint</joint_name>
+
+        <!-- Name of the motor link within this model -->
         <link_name>${robot_namespace}/rotor_${id}_link</link_name>
+
+        <!-- motor rotation direction -->
         <rotation_direction>${direction}</rotation_direction>
+
+        <!-- motor control input type -->
         <control_type>angular_speed</control_type>
 
-        <!-- -->
+        <!-- Whether to publish the angular velocities -->
         <publish_velocity>true</publish_velocity>
+
+        <!-- Update rate in Hz, defaults to 0.0, which means as fast as possible -->
         <update_rate>0.0</update_rate>
       </plugin>
     </gazebo>

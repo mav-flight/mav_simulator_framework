@@ -30,9 +30,13 @@
   -->
   <xacro:include filename="$(find mav_description)/urdf/hummingbird_base.urdf.xacro" />
   <!--
-    Instantiate the corresponding controller
+    Instantiate the hummingbird controller
   -->
   <xacro:multirotor_controller robot_namespace="${namespace}" />
+  <!--
+    Instantiate the gt p3d interface
+  -->
+  <xacro:gt_p3d robot_namespace="${namespace}" />
   <!--
     Instantiate the imu sensor
   -->
