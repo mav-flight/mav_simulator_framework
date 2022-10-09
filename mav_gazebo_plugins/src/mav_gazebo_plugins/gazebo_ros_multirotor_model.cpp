@@ -56,16 +56,6 @@ namespace mav_gazebo_plugins {
 /// @brief  Class to hold private data members (PIMPL pattern)
 class GazeboRosMultirotorModelPrivate {
  public:
-  ///////////////////////////////////////////////////
-  //////////// Constructors & Destructors ///////////
-  ///////////////////////////////////////////////////
-
-  /// @brief  Default Constructor
-  GazeboRosMultirotorModelPrivate();
-
-  /// @brief  Destructor
-  ~GazeboRosMultirotorModelPrivate();
-
   //////////////////////////////////////
   //////////// Class Methods ///////////
   //////////////////////////////////////
@@ -118,7 +108,7 @@ GazeboRosMultirotorModel::GazeboRosMultirotorModel()
     : impl_(std::make_unique<GazeboRosMultirotorModelPrivate>()) {}
 
 ///
-GazeboRosMultirotorModel::~GazeboRosMultirotorModel() {}
+GazeboRosMultirotorModel::~GazeboRosMultirotorModel() = default;
 
 ///
 void GazeboRosMultirotorModel::Load(gazebo::physics::ModelPtr _model,
@@ -207,12 +197,6 @@ void GazeboRosMultirotorModel::Load(gazebo::physics::ModelPtr _model,
       std::bind(&GazeboRosMultirotorModelPrivate::OnUpdate, impl_.get(),
                 std::placeholders::_1));
 }
-
-///
-GazeboRosMultirotorModelPrivate::GazeboRosMultirotorModelPrivate() {}
-
-///
-GazeboRosMultirotorModelPrivate::~GazeboRosMultirotorModelPrivate() {}
 
 ///
 void GazeboRosMultirotorModelPrivate::OnUpdate(

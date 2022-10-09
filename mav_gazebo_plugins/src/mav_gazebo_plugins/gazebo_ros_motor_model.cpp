@@ -57,16 +57,6 @@ namespace mav_gazebo_plugins {
 /// @brief  Class to hold private date members (PIMPL pattern)
 class GazeboRosMotorModelPrivate {
  public:
-  ///////////////////////////////////////////////////
-  //////////// Constructors & Destructors ///////////
-  ///////////////////////////////////////////////////
-
-  /// @brief  Default Constructor
-  GazeboRosMotorModelPrivate();
-
-  /// @brief  Destructor
-  ~GazeboRosMotorModelPrivate();
-
   //////////////////////////////////////
   //////////// Class Methods ///////////
   //////////////////////////////////////
@@ -170,7 +160,7 @@ GazeboRosMotorModel::GazeboRosMotorModel()
     : impl_(std::make_unique<GazeboRosMotorModelPrivate>()) {}
 
 ///
-GazeboRosMotorModel::~GazeboRosMotorModel() {}
+GazeboRosMotorModel::~GazeboRosMotorModel() = default;
 
 ///
 void GazeboRosMotorModel::Load(gazebo::physics::ModelPtr _model,
@@ -337,12 +327,6 @@ void GazeboRosMotorModel::Load(gazebo::physics::ModelPtr _model,
       /*time_const_down*/ impl_->time_const_down_,
       /*initial_state*/ impl_->ref_ctrl_input_));
 }
-
-///
-GazeboRosMotorModelPrivate::GazeboRosMotorModelPrivate() {}
-
-///
-GazeboRosMotorModelPrivate::~GazeboRosMotorModelPrivate() {}
 
 ///
 void GazeboRosMotorModelPrivate::OnUpdate(
